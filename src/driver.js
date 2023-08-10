@@ -1,5 +1,6 @@
 
 import {
+	GROUP_BROADCAST,
 	IDLE_TIMEOUT,
 	TIMEFRAME_PING_DISCONNECT,
 	PAYLOAD_TYPE             } from './consts.js';
@@ -17,12 +18,12 @@ export default class ExtWSDriver {
 	}
 
 	onConnect(client) {
-		// console.log(new Date(), 'client connected', client);
-
 		this.clients.set(
 			client.id,
 			client,
 		);
+
+		client.addToGroup(GROUP_BROADCAST);
 
 		client.stat.ts_last_active = Date.now();
 

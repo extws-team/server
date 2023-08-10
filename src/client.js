@@ -3,7 +3,6 @@ import IP                 from '@kirick/ip';
 import { customAlphabet } from 'nanoid';
 
 import {
-	GROUP_BROADCAST,
 	GROUP_PREFIX,
 	LISTENER_OPTIONS_ONCE,
 	PAYLOAD_TYPE         } from './consts.js';
@@ -58,8 +57,6 @@ export default class ExtWSClient extends EventTarget {
 		// 	default:
 		// 		this.encoding = ENCODING.JSON;
 		// }
-
-		this.addToGroup(GROUP_BROADCAST);
 	}
 
 	#listeners = new Set();

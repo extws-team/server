@@ -37,7 +37,19 @@ export default class ExtWSTestDriver extends ExtWSDriver {
 }
 
 class ExtWSTestClient extends ExtWSClient {
+	#raw_client;
+
+	constructor(...args) {
+		super(...args);
+
+		this.#raw_client = {
+			groups: new Set(),
+		};
+	}
+
 	addToGroup(group) {
+		this.#raw_client.groups.add(group);
+
 		this.emit(
 			'client.test.addToGroup',
 			{ group },
@@ -45,6 +57,8 @@ class ExtWSTestClient extends ExtWSClient {
 	}
 
 	removeFromGroup(group) {
+		this.#raw_client.groups.delete(group);
+
 		this.emit(
 			'client.test.removeFromGroup',
 			{ group },
