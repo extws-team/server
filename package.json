@@ -1,6 +1,6 @@
 {
 	"name": "@extws/server",
-	"version": "0.1.0-beta.1",
+	"version": "0.1.0-beta.3",
 	"description": "Simple ans powerful WebSocket server.",
 	"publishConfig": {
 		"access": "public",
@@ -8,6 +8,11 @@
 	},
 	"main": "src/main.js",
 	"type": "module",
+	"exports": {
+		".": "./src/main.js",
+		"./client": "./src/client.js",
+		"./driver": "./src/driver.js"
+	},
 	"engines": {
 		"node": ">=16.0.0"
 	},

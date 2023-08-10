@@ -125,3 +125,6 @@ export default class ExtWS extends EventTarget {
 		);
 	}
 }
+
+export { default as ExtWSClient } from './client.js';
+export { default as ExtWSDriver } from './driver.js';

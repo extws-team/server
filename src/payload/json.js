@@ -39,6 +39,10 @@ export function buildMessagePayload(event_type, data) {
 
 const JSON_START = new Set([ '[', '{' ]);
 export function parsePayload(payload) {
+	if (Buffer.isBuffer(payload)) {
+		payload = payload.toString();
+	}
+
 	const result = {
 		payload_type: payload.codePointAt(0) - 48,
 	};
@@ -47,13 +51,16 @@ export function parsePayload(payload) {
 	let event_type = '';
 	for (
 		let index = start;
-		index < payload.length && JSON_START.has(payload[index]) === false; // TODO: limit event_type to 31
+		index < payload.length && JSON_START.has(payload[index]) === false;
 		index++
 	) {
 		event_type += payload[index];
 		start++;
 	}
 
+	if (event_type.length > 31) {
+		throw new Error('Event type cannot be longer than 31 characters.');
+	}
 	if (event_type.length > 0) {
 		result.event_type = event_type;
 	}
