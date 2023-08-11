@@ -11,6 +11,7 @@ const TIMEFRAME_PING_DISCONNECT_MS = TIMEFRAME_PING_DISCONNECT * 1e3;
 const IDLE_TIMEOUT_PING_MS = IDLE_TIMEOUT_DISCONNECT_MS - TIMEFRAME_PING_DISCONNECT_MS;
 
 export default class ExtWSDriver {
+	server; // set by ExtWS constructor
 	clients = new Map();
 
 	constructor() {

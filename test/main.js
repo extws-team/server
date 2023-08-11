@@ -12,12 +12,24 @@ import {
 	GROUP_BROADCAST,
 	GROUP_PREFIX   } from '../src/consts.js';
 
-import ExtWSDriver from './driver.js';
+import ExtWSTestAdapter from './adapter.js';
+import ExtWSTestDriver  from './driver.js';
 
-const driver = new ExtWSDriver();
-const server = new ExtWS({
-	driver,
-});
+function createServer() {
+	const adapter = new ExtWSTestAdapter();
+	const driver = new ExtWSTestDriver();
+	const server = new ExtWS({
+		driver,
+		adapter,
+	});
+
+	return server;
+}
+function getClient(server) {
+	return server.clients.values().next().value;
+}
+
+const server = createServer();
 
 describe('ExtWS', () => {
 	it('client connect', () => {
@@ -60,14 +72,14 @@ describe('ExtWS', () => {
 			}),
 		]);
 
-		driver.testConnect();
+		server.driver.testConnect();
 
 		return promise;
 	});
 
 	describe('manage client\'s groups', () => {
 		it('add to group', () => new Promise((resolve) => {
-			const client = driver.clients.values().next().value;
+			const client = getClient(server);
 
 			client.once(
 				'client.test.addToGroup',
@@ -84,7 +96,7 @@ describe('ExtWS', () => {
 			client.join('foo');
 		}));
 		it('remove from group', () => new Promise((resolve) => {
-			const client = driver.clients.values().next().value;
+			const client = getClient(server);
 
 			client.once(
 				'client.test.removeFromGroup',
@@ -104,7 +116,7 @@ describe('ExtWS', () => {
 
 	describe('receive messages from client', () => {
 		it('default name (message)', () => new Promise((resolve) => {
-			const client = driver.clients.values().next().value;
+			const client = getClient(server);
 
 			client.once(
 				'client.message',
@@ -120,13 +132,13 @@ describe('ExtWS', () => {
 				},
 			);
 
-			driver.onMessage(
+			server.driver.onMessage(
 				client,
 				'4{"foo":"bar"}',
 			);
 		}));
 		it('custom name', () => new Promise((resolve) => {
-			const client = driver.clients.values().next().value;
+			const client = getClient(server);
 
 			client.once(
 				'client.custom',
@@ -142,7 +154,7 @@ describe('ExtWS', () => {
 				},
 			);
 
-			driver.onMessage(
+			server.driver.onMessage(
 				client,
 				'4custom{"foo":"bar"}',
 			);
@@ -151,7 +163,7 @@ describe('ExtWS', () => {
 
 	describe('send messages to client', () => {
 		it('default name (message)', () => new Promise((resolve) => {
-			const client = driver.clients.values().next().value;
+			const client = getClient(server);
 
 			client.once(
 				'client.test.payload',
@@ -170,7 +182,7 @@ describe('ExtWS', () => {
 			});
 		}));
 		it('custom name', () => new Promise((resolve) => {
-			const client = driver.clients.values().next().value;
+			const client = getClient(server);
 
 			client.once(
 				'client.test.payload',
@@ -246,12 +258,99 @@ describe('ExtWS', () => {
 		}));
 	});
 
+	describe('using adapter', () => {
+		it('to group', () => new Promise((resolve) => {
+			server.adapter.addEventListener(
+				'test.publish',
+				(event) => {
+					// payload
+					strictEqual(
+						event.args[0],
+						'4{"foo":"bar"}',
+					);
+
+					// socket_id
+					strictEqual(
+						event.args[1],
+						null,
+					);
+
+					// group_id
+					strictEqual(
+						event.args[2],
+						'some-channel',
+					);
+
+					// broadcast
+					strictEqual(
+						event.args[3],
+						false,
+					);
+
+					resolve();
+				},
+				{
+					once: true,
+				},
+			);
+
+			server.sendToGroup(
+				'some-channel',
+				{
+					foo: 'bar',
+				},
+			);
+		}));
+		it('broadcast', () => new Promise((resolve) => {
+			server.adapter.addEventListener(
+				'test.publish',
+				(event) => {
+					// payload
+					strictEqual(
+						event.args[0],
+						'4someEventType{"foo":"bar"}',
+					);
+
+					// socket_id
+					strictEqual(
+						event.args[1],
+						null,
+					);
+
+					// group_id
+					strictEqual(
+						event.args[2],
+						null,
+					);
+
+					// broadcast
+					strictEqual(
+						event.args[3],
+						true,
+					);
+
+					resolve();
+				},
+				{
+					once: true,
+				},
+			);
+
+			server.broadcast(
+				'someEventType',
+				{
+					foo: 'bar',
+				},
+			);
+		}));
+	});
+
 	describe('deferred', () => {
 		it('client timeout disconnect', async function () {
 			this.slow(1_000_000);
 			this.timeout(121_000);
 
-			const client = driver.clients.values().next().value;
+			const client = getClient(server);
 			const ts_start = Date.now();
 
 			const ts_end = await new Promise((resolve) => {

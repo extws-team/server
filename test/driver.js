@@ -27,11 +27,6 @@ export default class ExtWSTestDriver extends ExtWSDriver {
 			},
 		);
 
-		console.log(
-			'[DRIVER] Client connected',
-			client,
-		);
-
 		this.onConnect(client);
 	}
 }

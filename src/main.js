@@ -9,10 +9,11 @@ import * as ENCODER_JSON    from './payload/json.js';
 
 export default class ExtWS extends EventTarget {
 	driver;
+	adapter;
 
 	constructor({
 		driver,
-		// adapter,
+		adapter,
 	}) {
 		super();
 
@@ -22,7 +23,10 @@ export default class ExtWS extends EventTarget {
 		this.driver = driver;
 		this.driver.server = this;
 
-		// TODO: adapter
+		if (adapter) {
+			this.adapter = adapter;
+			this.adapter.server = this;
+		}
 	}
 
 	get clients() {
@@ -52,12 +56,13 @@ export default class ExtWS extends EventTarget {
 		);
 	}
 
-	#sendPayload(
+	// eslint-disable-next-line max-params
+	sendPayload(
 		payload,
 		socket_id = null,
 		group_id = null,
 		is_broadcast = false,
-		// is_from_adapter = false,
+		is_from_adapter = false,
 	) {
 		if (typeof socket_id === 'string') {
 			const client = this.clients.get(socket_id);
@@ -78,22 +83,21 @@ export default class ExtWS extends EventTarget {
 			);
 		}
 
-		// TODO: adapter
-		// if (
-		// 	!is_from_adapter
-		// 	&& this._adapter
-		// ) {
-		// 	this._adapter.publish(
-		// 		payload,
-		// 		socket_id,
-		// 		group_id,
-		// 		is_broadcast,
-		// 	);
-		// }
+		if (
+			!is_from_adapter
+			&& this.adapter
+		) {
+			this.adapter.publish(
+				payload,
+				socket_id,
+				group_id,
+				is_broadcast,
+			);
+		}
 	}
 
 	sendToSocket(socket_id, argument1, argument2) {
-		this.#sendPayload(
+		this.sendPayload(
 			ENCODER_JSON.buildMessagePayload(
 				argument1,
 				argument2,
@@ -103,7 +107,7 @@ export default class ExtWS extends EventTarget {
 	}
 
 	sendToGroup(group_id, argument1, argument2) {
-		this.#sendPayload(
+		this.sendPayload(
 			ENCODER_JSON.buildMessagePayload(
 				argument1,
 				argument2,
@@ -114,7 +118,7 @@ export default class ExtWS extends EventTarget {
 	}
 
 	broadcast(argument0, argument1) {
-		this.#sendPayload(
+		this.sendPayload(
 			ENCODER_JSON.buildMessagePayload(
 				argument0,
 				argument1,
