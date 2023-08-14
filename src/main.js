@@ -67,7 +67,7 @@ export default class ExtWS extends EventTarget {
 		if (typeof socket_id === 'string') {
 			const client = this.clients.get(socket_id);
 			if (client instanceof ExtWSClient) {
-				client.emit(payload);
+				client.sendPayload(payload);
 			}
 		}
 		else if (typeof group_id === 'string') {

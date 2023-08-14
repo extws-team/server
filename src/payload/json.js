@@ -38,9 +38,24 @@ export function buildMessagePayload(event_type, data) {
 }
 
 const JSON_START = new Set([ '[', '{' ]);
+const textDecoder = new TextDecoder();
 export function parsePayload(payload) {
-	if (Buffer.isBuffer(payload)) {
-		payload = payload.toString();
+	if (typeof payload === 'string') {
+		// do nothing
+	}
+	else if (
+		payload instanceof ArrayBuffer
+		|| (
+			ArrayBuffer.isView(payload)
+			&& payload instanceof DataView === false
+		)
+	) {
+		payload = textDecoder.decode(payload);
+	}
+	else {
+		const error = new TypeError('Invalid payload type.');
+		error.payload = payload;
+		throw error;
 	}
 
 	const result = {

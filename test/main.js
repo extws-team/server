@@ -205,6 +205,54 @@ describe('ExtWS', () => {
 		}));
 	});
 
+	describe('send messages to client by it\'s id', () => {
+		it('default name (message)', () => new Promise((resolve) => {
+			const client = getClient(server);
+
+			client.once(
+				'client.test.payload',
+				(event) => {
+					strictEqual(
+						event.data,
+						'4{"foo":"bar"}',
+					);
+
+					resolve();
+				},
+			);
+
+			server.sendToSocket(
+				client.id,
+				{
+					foo: 'bar',
+				},
+			);
+		}));
+		it('custom name', () => new Promise((resolve) => {
+			const client = getClient(server);
+
+			client.once(
+				'client.test.payload',
+				(event) => {
+					strictEqual(
+						event.data,
+						'4helloworld{"foo":"bar"}',
+					);
+
+					resolve();
+				},
+			);
+
+			server.sendToSocket(
+				client.id,
+				'helloworld',
+				{
+					foo: 'bar',
+				},
+			);
+		}));
+	});
+
 	describe('send message to group', () => {
 		it('to group name', () => new Promise((resolve) => {
 			server.once(
@@ -347,8 +395,8 @@ describe('ExtWS', () => {
 
 	describe('deferred', () => {
 		it('client timeout disconnect', async function () {
-			this.slow(1_000_000);
-			this.timeout(121_000);
+			this.slow(60_100);
+			this.timeout(120_100);
 
 			const client = getClient(server);
 			const ts_start = Date.now();
@@ -371,11 +419,10 @@ describe('ExtWS', () => {
 			return true;
 		});
 	});
+});
 
-	after(() => {
-		setTimeout(
-			() => process.exit(0), // eslint-disable-line no-process-exit, unicorn/no-process-exit
-			1000,
-		);
+after(() => {
+	setTimeout(() => {
+		process.exit(0); // eslint-disable-line no-process-exit, unicorn/no-process-exit
 	});
 });
