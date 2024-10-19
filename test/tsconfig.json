@@ -1,0 +1,17 @@
+{
+	"compileOnSave": false,
+	"compilerOptions": {
+		"outDir": "/dev/null",
+		"declaration": false,
+		"target": "esnext",
+		"module": "nodenext",
+		"lib": [
+			"ESNext",
+			"ES2021.String"
+		],
+		"allowSyntheticDefaultImports": true,
+		"skipLibCheck": true,
+		"strict": true,
+		"removeComments": false
+	}
+}
