@@ -1,4 +1,5 @@
 import {
+	beforeEach,
 	describe,
 	expect,
 	test,
@@ -10,7 +11,10 @@ import {
 	GROUP_BROADCAST,
 	GROUP_PREFIX,
 } from '../src/consts.js';
-import { ExtWSTest } from '../test/server.js';
+import {
+	ExtWSTest,
+	TestPublishEvent,
+} from '../test/server.js';
 import { OutcomePayloadEventType } from './payload/outcome-event.js';
 
 const server = new ExtWSTest();
@@ -18,6 +22,24 @@ const server = new ExtWSTest();
 interface OutcomePayload extends Event {
 	group_id?: string;
 	payload: string;
+}
+
+function shouldHang(promise: Promise<unknown>) {
+	return new Promise((resolve, reject) => {
+		setTimeout(
+			resolve,
+			100,
+		);
+
+		// eslint-disable-next-line promise/catch-or-return, promise/always-return
+		promise.then(() => {
+			reject(new Error('Promise resolved'));
+		});
+
+		promise.catch(() => {
+			reject(new Error('Promise rejected'));
+		});
+	});
 }
 
 describe('ExtWS', () => {
@@ -185,164 +207,197 @@ describe('server -> client', () => {
 	});
 
 	describe('server.sendToSocket', () => {
-		describe('with defined client', () => {
-			const client = server.open();
+		const client = server.open();
 
-			test('(socket_id)', async () => {
-				const promise = server.wait('test.sendPayload');
+		test('(socket_id)', async () => {
+			const promise = server.wait('test.sendPayload');
 
-				server.sendToSocket(client.id);
+			server.sendToSocket(client.id);
 
-				const event = await promise;
-				expect(event.data).toStrictEqual('4');
-			});
-
-			test('(socket_id, event_type)', async () => {
-				const promise = server.wait('test.sendPayload');
-
-				server.sendToSocket(client.id, 'extws_event');
-
-				const event = await promise;
-				expect(event.data).toStrictEqual('4extws_event');
-			});
-
-			test('(socket_id, data)', async () => {
-				const promise = server.wait('test.sendPayload');
-
-				server.sendToSocket(client.id, { foo: 'bar' });
-
-				const event = await promise;
-				expect(event.data).toStrictEqual('4{"foo":"bar"}');
-			});
-
-			test('(socket_id, event_type, data)', async () => {
-				const promise = server.wait('test.sendPayload');
-
-				server.sendToSocket(client.id, 'extws_event', { foo: 'bar' });
-
-				const event = await promise;
-				expect(event.data).toStrictEqual('4extws_event{"foo":"bar"}');
-			});
+			const event = await promise;
+			expect(event.data).toStrictEqual('4');
 		});
 
-		describe('with undefined client', () => {
-			const socket_id = 'aaa';
+		test('(socket_id, event_type)', async () => {
+			const promise = server.wait('test.sendPayload');
 
-			test('(socket_id)', async () => {
-				const promise = server.wait<OutcomePayload>(OutcomePayloadEventType.SOCKET);
+			server.sendToSocket(client.id, 'extws_event');
 
-				server.sendToSocket(socket_id);
+			const event = await promise;
+			expect(event.data).toStrictEqual('4extws_event');
+		});
 
-				const event = await promise;
-				expect(event.payload).toStrictEqual('4');
-			});
+		test('(socket_id, data)', async () => {
+			const promise = server.wait('test.sendPayload');
 
-			test('(socket_id, event_type)', async () => {
-				const promise = server.wait<OutcomePayload>(OutcomePayloadEventType.SOCKET);
+			server.sendToSocket(client.id, { foo: 'bar' });
 
-				server.sendToSocket(socket_id, 'extws_event');
+			const event = await promise;
+			expect(event.data).toStrictEqual('4{"foo":"bar"}');
+		});
 
-				const event = await promise;
-				expect(event.payload).toStrictEqual('4extws_event');
-			});
+		test('(socket_id, event_type, data)', async () => {
+			const promise = server.wait('test.sendPayload');
 
-			test('(socket_id, data)', async () => {
-				const promise = server.wait<OutcomePayload>(OutcomePayloadEventType.SOCKET);
+			server.sendToSocket(client.id, 'extws_event', { foo: 'bar' });
 
-				server.sendToSocket(socket_id, { foo: 'bar' });
-
-				const event = await promise;
-				expect(event.payload).toStrictEqual('4{"foo":"bar"}');
-			});
-
-			test('(socket_id, event_type, data)', async () => {
-				const promise = server.wait<OutcomePayload>(OutcomePayloadEventType.SOCKET);
-
-				server.sendToSocket(socket_id, 'extws_event', { foo: 'bar' });
-
-				const event = await promise;
-				expect(event.payload).toStrictEqual('4extws_event{"foo":"bar"}');
-			});
+			const event = await promise;
+			expect(event.data).toStrictEqual('4extws_event{"foo":"bar"}');
 		});
 	});
 
 	describe('server.sendToGroup', () => {
 		test('(group_id)', async () => {
-			const promise = server.wait<OutcomePayload>(OutcomePayloadEventType.GROUP);
+			const promise = server.wait<TestPublishEvent>(TestPublishEvent.type);
 
 			server.sendToGroup('channel');
 
 			const event = await promise;
-			expect(event.payload).toStrictEqual('4');
-			expect(event.group_id).toBe('channel');
+			expect(event.group_id).toBe('g-channel');
+			expect(event.payload).toBe('4');
 		});
 
 		test('(group_id, event_type)', async () => {
-			const promise = server.wait<OutcomePayload>(OutcomePayloadEventType.GROUP);
+			const promise = server.wait<TestPublishEvent>(TestPublishEvent.type);
 
 			server.sendToGroup('channel', 'extws_event');
 
 			const event = await promise;
+			expect(event.group_id).toBe('g-channel');
 			expect(event.payload).toStrictEqual('4extws_event');
-			expect(event.group_id).toBe('channel');
 		});
 
 		test('(group_id, data)', async () => {
+			const promise = server.wait<TestPublishEvent>(TestPublishEvent.type);
+
+			server.sendToGroup('channel', { foo: 'bar' });
+
+			const event = await promise;
+			expect(event.group_id).toBe('g-channel');
+			expect(event.payload).toStrictEqual('4{"foo":"bar"}');
+		});
+
+		test('(group_id, event_type, data)', async () => {
+			const promise = server.wait<TestPublishEvent>(TestPublishEvent.type);
+
+			server.sendToGroup('channel', 'extws_event', { foo: 'bar' });
+
+			const event = await promise;
+			expect(event.group_id).toBe('g-channel');
+			expect(event.payload).toStrictEqual('4extws_event{"foo":"bar"}');
+		});
+	});
+
+	describe('server.broadcast', () => {
+		test('()', async () => {
+			const promise = server.wait<TestPublishEvent>(TestPublishEvent.type);
+
+			server.broadcast();
+
+			const event = await promise;
+			expect(event.group_id).toStrictEqual('broadcast');
+			expect(event.payload).toStrictEqual('4');
+		});
+
+		test('(event_type)', async () => {
+			const promise = server.wait<TestPublishEvent>(TestPublishEvent.type);
+
+			server.broadcast('extws_event');
+
+			const event = await promise;
+			expect(event.group_id).toStrictEqual('broadcast');
+			expect(event.payload).toStrictEqual('4extws_event');
+		});
+
+		test('(data)', async () => {
+			const promise = server.wait<TestPublishEvent>(TestPublishEvent.type);
+
+			server.broadcast({ foo: 'bar' });
+
+			const event = await promise;
+			expect(event.group_id).toStrictEqual('broadcast');
+			expect(event.payload).toStrictEqual('4{"foo":"bar"}');
+		});
+
+		test('(event_type, data)', async () => {
+			const promise = server.wait<TestPublishEvent>(TestPublishEvent.type);
+
+			server.broadcast('extws_event', { foo: 'bar' });
+
+			const event = await promise;
+			expect(event.group_id).toStrictEqual('broadcast');
+			expect(event.payload).toStrictEqual('4extws_event{"foo":"bar"}');
+		});
+	});
+});
+
+describe('adapter', () => {
+	describe('off', () => {
+		beforeEach(() => {
+			server.has_adapter = false;
+		});
+
+		test('sendToSocket', async () => {
+			const promise = shouldHang(
+				server.wait(OutcomePayloadEventType.SOCKET),
+			);
+
+			server.sendToSocket('777', { foo: 'bar' });
+
+			await expect(promise).resolves.toBeUndefined();
+		});
+
+		test('sendToGroup', async () => {
+			const promise = shouldHang(
+				server.wait(OutcomePayloadEventType.GROUP),
+			);
+
+			server.sendToGroup('channel', { foo: 'bar' });
+
+			await expect(promise).resolves.toBeUndefined();
+		});
+
+		test('broadcast', async () => {
+			const promise = shouldHang(
+				server.wait(OutcomePayloadEventType.BROADCAST),
+			);
+
+			server.broadcast({ foo: 'bar' });
+
+			await expect(promise).resolves.toBeUndefined();
+		});
+	});
+
+	describe('on', () => {
+		beforeEach(() => {
+			server.has_adapter = true;
+		});
+
+		test('sendToSocket', async () => {
+			const promise = server.wait<OutcomePayload>(OutcomePayloadEventType.SOCKET);
+
+			server.sendToSocket('777', { foo: 'bar' });
+
+			const event = await promise;
+			expect(event.payload).toStrictEqual('4{"foo":"bar"}');
+		});
+
+		test('sendToGroup', async () => {
 			const promise = server.wait<OutcomePayload>(OutcomePayloadEventType.GROUP);
 
 			server.sendToGroup('channel', { foo: 'bar' });
 
 			const event = await promise;
 			expect(event.payload).toStrictEqual('4{"foo":"bar"}');
-			expect(event.group_id).toBe('channel');
 		});
 
-		test('(group_id, event_type, data)', async () => {
-			const promise = server.wait<OutcomePayload>(OutcomePayloadEventType.GROUP);
-
-			server.sendToGroup('channel', 'extws_event', { foo: 'bar' });
-
-			const event = await promise;
-			expect(event.payload).toStrictEqual('4extws_event{"foo":"bar"}');
-			expect(event.group_id).toBe('channel');
-		});
-	});
-
-	describe('server.broadcast', () => {
-		test('()', async () => {
-			const promise = server.wait<OutcomePayload>(OutcomePayloadEventType.BROADCAST);
-
-			server.broadcast();
-
-			const event = await promise;
-			expect(event.payload).toStrictEqual('4');
-		});
-
-		test('(event_type)', async () => {
-			const promise = server.wait<OutcomePayload>(OutcomePayloadEventType.BROADCAST);
-
-			server.broadcast('extws_event');
-
-			const event = await promise;
-			expect(event.payload).toStrictEqual('4extws_event');
-		});
-
-		test('(data)', async () => {
+		test('broadcast', async () => {
 			const promise = server.wait<OutcomePayload>(OutcomePayloadEventType.BROADCAST);
 
 			server.broadcast({ foo: 'bar' });
 
 			const event = await promise;
 			expect(event.payload).toStrictEqual('4{"foo":"bar"}');
-		});
-
-		test('(event_type, data)', async () => {
-			const promise = server.wait<OutcomePayload>(OutcomePayloadEventType.BROADCAST);
-
-			server.broadcast('extws_event', { foo: 'bar' });
-
-			const event = await promise;
-			expect(event.payload).toStrictEqual('4extws_event{"foo":"bar"}');
 		});
 	});
 });

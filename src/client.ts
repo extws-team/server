@@ -106,7 +106,11 @@ export class ExtWSClient extends ExtWSEventTarget {
 
 	private is_disconnected: boolean = false;
 
-	disconnect() {
+	/**
+	 * Disconnects client.
+	 * @param _is_disconnected - If true, client is already disconnected from the Websocket server.
+	 */
+	disconnect(_is_disconnected: boolean = false) {
 		if (this.is_disconnected === false) {
 			const event = new ExtWSEvent(
 				'disconnect',

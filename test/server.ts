@@ -5,6 +5,22 @@ import {
 import { ExtWSTestClient } from './client.js';
 import { ExtWSClient } from '../src/client.js';
 
+interface LastPublish {
+	group_id?: string;
+	payload?: string;
+}
+
+export class TestPublishEvent extends Event {
+	static type = 'test:publish';
+
+	constructor(
+		public group_id: string,
+		public payload: string,
+	) {
+		super(TestPublishEvent.type);
+	}
+}
+
 export class ExtWSTest extends ExtWS {
 	open() {
 		const client = new ExtWSTestClient(
@@ -23,5 +39,14 @@ export class ExtWSTest extends ExtWS {
 
 	onMessage(client: ExtWSClient, payload: string): void {
 		super.onMessage(client, payload);
+	}
+
+	protected publish(group_id: string, payload: string) {
+		this.dispatchEvent(
+			new TestPublishEvent(
+				group_id,
+				payload,
+			),
+		);
 	}
 }

@@ -1,4 +1,5 @@
 import {
+	GROUP_PREFIX,
 	GROUP_BROADCAST,
 	IDLE_TIMEOUT,
 	IDLE_TIMEOUT_DISCONNECT_MS,
@@ -26,6 +27,7 @@ import {
 
 export class ExtWS extends ExtWSEventTarget {
 	clients: Map<string, ExtWSClient> = new Map();
+	has_adapter: boolean = false;
 
 	constructor() {
 		super();
@@ -118,7 +120,7 @@ export class ExtWS extends ExtWSEventTarget {
 		if (client instanceof ExtWSClient) {
 			client.send(arg1, arg2);
 		}
-		else {
+		else if (this.has_adapter) {
 			this.dispatchEvent(
 				new OutcomePayloadSocketEvent(
 					socket_id,
@@ -138,19 +140,28 @@ export class ExtWS extends ExtWSEventTarget {
 	sendToGroup(group_id: string, event_type: string, data: PayloadData): void;
 	sendToGroup(
 		group_id: string,
-		argument1?: string | PayloadData,
-		argument2?: PayloadData,
+		arg1?: string | PayloadData,
+		arg2?: PayloadData,
 	) {
-		this.dispatchEvent(
-			new OutcomePayloadGroupEvent(
-				group_id,
-				buildPayload(
-					PayloadType.MESSAGE,
-					argument1,
-					argument2,
-				),
-			),
+		const payload = buildPayload(
+			PayloadType.MESSAGE,
+			arg1,
+			arg2,
 		);
+
+		this.publish(
+			`${GROUP_PREFIX}${group_id}`,
+			payload,
+		);
+
+		if (this.has_adapter) {
+			this.dispatchEvent(
+				new OutcomePayloadGroupEvent(
+					group_id,
+					payload,
+				),
+			);
+		}
 	}
 
 	broadcast(): void;
@@ -161,15 +172,35 @@ export class ExtWS extends ExtWSEventTarget {
 		arg0?: string | PayloadData,
 		arg1?: PayloadData,
 	): void {
-		this.dispatchEvent(
-			new OutcomePayloadBroadcastEvent(
-				buildPayload(
-					PayloadType.MESSAGE,
-					arg0,
-					arg1,
-				),
-			),
+		const payload = buildPayload(
+			PayloadType.MESSAGE,
+			arg0,
+			arg1,
 		);
+
+		this.publish(
+			GROUP_BROADCAST,
+			payload,
+		);
+
+		if (this.has_adapter) {
+			this.dispatchEvent(
+				new OutcomePayloadBroadcastEvent(payload),
+			);
+		}
+	}
+
+	/**
+	 * Sends a message to a specific group of clients. THis method should be implemented by WebSocket server implementation.
+	 * @param _channel -
+	 * @param _payload -
+	 */
+	// eslint-disable-next-line class-methods-use-this
+	protected publish(
+		_channel: string,
+		_payload: string,
+	) {
+		throw new Error('Method not implemented.');
 	}
 
 	private deferClientsWatch() {
