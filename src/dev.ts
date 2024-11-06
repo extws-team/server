@@ -4,7 +4,7 @@ export {
 } from './consts.js';
 
 export {
-	type OutcomePayloadEventType,
+	OutcomePayloadEventType,
 	OutcomePayloadSocketEvent,
 	OutcomePayloadGroupEvent,
 	OutcomePayloadBroadcastEvent,
