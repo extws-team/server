@@ -248,4 +248,3 @@ export class ExtWS extends ExtWSEventTarget {
 
 export { ExtWSClient } from './client.js';
 export { ExtWSEvent } from './event-target.js';
-export { OutcomePayloadEventType } from './payload/outcome-event.js';

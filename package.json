@@ -1,6 +1,6 @@
 {
 	"name": "@extws/server",
-	"version": "0.2.0-beta.3",
+	"version": "0.2.0-beta.4",
 	"description": "Simple ans powerful WebSocket server.",
 	"publishConfig": {
 		"access": "public"
@@ -12,6 +12,9 @@
 		".": {
 			"import": "./dist/esm/main.js",
 			"require": "./dist/main.cjs"
+		},
+		"./dev": {
+			"import": "./dist/esm/dev.js"
 		}
 	},
 	"engines": {

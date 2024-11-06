@@ -5,11 +5,6 @@ import {
 import { ExtWSTestClient } from './client.js';
 import { ExtWSClient } from '../src/client.js';
 
-interface LastPublish {
-	group_id?: string;
-	payload?: string;
-}
-
 export class TestPublishEvent extends Event {
 	static type = 'test:publish';
 
