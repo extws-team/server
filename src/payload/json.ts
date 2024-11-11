@@ -87,13 +87,17 @@ function isTypedArray(value: unknown): value is TypedArray {
 export function parsePayload(
 	payload: string
 		| ArrayBuffer
-		| TypedArray,
+		| TypedArray
+		| Buffer[],
 ): Payload {
 	if (typeof payload === 'string') {
 		// do nothing
 	}
 	else if (payload instanceof ArrayBuffer || isTypedArray(payload)) {
 		payload = textDecoder.decode(payload);
+	}
+	else if (Array.isArray(payload)) {
+		payload = Buffer.concat(payload).toString();
 	}
 	else {
 		throw new TypeError('Invalid payload type.');
