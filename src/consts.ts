@@ -6,7 +6,3 @@ export const IDLE_TIMEOUT_PING_MS = IDLE_TIMEOUT_DISCONNECT_MS - TIMEFRAME_PING_
 
 export const GROUP_BROADCAST: string = 'broadcast';
 export const GROUP_PREFIX: string = 'g-';
-
-export const LISTENER_OPTIONS_ONCE = {
-	once: true,
-};

@@ -2,7 +2,7 @@ import {
 	ExtWSClient,
 	type ClientOptions,
 } from '../src/client.js';
-import { ExtWSEvent } from '../src/event-target.js';
+import { ExtWSEvent } from '../src/event.js';
 import { ExtWS } from '../src/main.js';
 
 export class ExtWSTestClient extends ExtWSClient {

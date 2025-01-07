@@ -1,3 +1,4 @@
+import type { NeoEvent } from 'neoevents';
 import {
 	beforeEach,
 	describe,
@@ -24,6 +25,11 @@ interface OutcomePayload extends Event {
 	payload: string;
 }
 
+/**
+ * Resolves if the given promise hangs.
+ * @param promise The promise to check.
+ * @returns -
+ */
 function shouldHang(promise: Promise<unknown>) {
 	return new Promise((resolve, reject) => {
 		setTimeout(
@@ -54,21 +60,21 @@ describe('ExtWS', () => {
 	});
 
 	test('addToGroup', async () => {
-		const promise = server.wait('test.addToGroup');
+		const promise = server.wait<NeoEvent<{ group: string }>>('test.addToGroup');
 
 		server.open();
 
 		const event = await promise;
 
-		expect(event.data.group).toBe(GROUP_BROADCAST);
+		expect(event.detail.group).toBe(GROUP_BROADCAST);
 	});
 
 	test('sendPayload', async () => {
-		const promise = server.wait('test.sendPayload');
+		const promise = server.wait<NeoEvent<string>>('test.sendPayload');
 		server.open();
 
 		const event = await promise;
-		const startsWith = event.data.startsWith('1{"');
+		const startsWith = event.detail.startsWith('1{"');
 		expect(startsWith).toBe(true);
 	});
 
@@ -78,13 +84,13 @@ describe('ExtWS', () => {
 		const server_local = new ExtWSTest();
 		server_local.open();
 
-		const promise_ping = server_local.wait('test.sendPayload');
+		const promise_ping = server_local.wait<NeoEvent<string>>('test.sendPayload');
 		const promise_disconnect = server_local.wait('disconnect');
 
 		vi.advanceTimersByTime(IDLE_TIMEOUT_PING_MS);
 		const event_ping = await promise_ping;
 		expect(event_ping).not.toBe(undefined);
-		expect(event_ping.data).toBe('2');
+		expect(event_ping.detail).toBe('2');
 
 		vi.advanceTimersByTime(TIMEFRAME_PING_DISCONNECT_MS);
 		expect(
@@ -112,20 +118,20 @@ describe('client', () => {
 	describe('groups', () => {
 		test('join', async () => {
 			const client = server.open();
-			const promise = server.wait('test.addToGroup');
+			const promise = server.wait<NeoEvent<{ group: string }>>('test.addToGroup');
 			client?.join('foo');
 
 			const event = await promise;
-			expect(event.data.group).toBe(`${GROUP_PREFIX}foo`);
+			expect(event.detail.group).toBe(`${GROUP_PREFIX}foo`);
 		});
 
 		test('remove', async () => {
 			const client = server.open();
-			const promise = server.wait('test.removeFromGroup');
+			const promise = server.wait<NeoEvent<{ group: string }>>('test.removeFromGroup');
 			client?.leave('foo');
 
 			const event = await promise;
-			expect(event.data.group).toBe(`${GROUP_PREFIX}foo`);
+			expect(event.detail.group).toBe(`${GROUP_PREFIX}foo`);
 		});
 	});
 
@@ -143,21 +149,21 @@ describe('client', () => {
 describe('client -> server', () => {
 	test('onMessage with no type', async () => {
 		const client = server.open();
-		const promise = server.wait('message');
+		const promise = server.wait<NeoEvent>('message');
 		server.onMessage(client, '4{"foo":"boo"}');
 
 		const event = await promise;
-		expect(event.data).toEqual({ foo: 'boo' });
+		expect(event.detail).toStrictEqual({ foo: 'boo' });
 		expect(event.type).toBe('message');
 	});
 
 	test('onMessage with type', async () => {
 		const client = server.open();
-		const promise = server.wait('extws');
+		const promise = server.wait<NeoEvent>('extws');
 		server.onMessage(client, '4extws{"foo":"boo"}');
 
 		const event = await promise;
-		expect(event.data).toEqual({ foo: 'boo' });
+		expect(event.detail).toEqual({ foo: 'boo' });
 		expect(event.type).toBe('extws');
 	});
 });
@@ -172,7 +178,7 @@ describe('server -> client', () => {
 			client.send();
 
 			const event = await promise;
-			expect(event.data).toStrictEqual('4');
+			expect(event.detail).toStrictEqual('4');
 		});
 
 		test('(event_type)', async () => {
@@ -181,7 +187,7 @@ describe('server -> client', () => {
 			client.send('test');
 
 			const event = await promise;
-			expect(event.data).toStrictEqual('4test');
+			expect(event.detail).toStrictEqual('4test');
 		});
 
 		test('(data)', async () => {
@@ -190,7 +196,7 @@ describe('server -> client', () => {
 			client.send({ foo: 'bar' });
 
 			const event = await promise;
-			expect(event.data).toStrictEqual('4{"foo":"bar"}');
+			expect(event.detail).toStrictEqual('4{"foo":"bar"}');
 		});
 
 		test('(event_type, data)', async () => {
@@ -202,7 +208,7 @@ describe('server -> client', () => {
 			);
 
 			const event = await promise;
-			expect(event.data).toStrictEqual('4test{"foo":"bar"}');
+			expect(event.detail).toStrictEqual('4test{"foo":"bar"}');
 		});
 	});
 
@@ -215,7 +221,7 @@ describe('server -> client', () => {
 			server.sendToSocket(client.id);
 
 			const event = await promise;
-			expect(event.data).toStrictEqual('4');
+			expect(event.detail).toStrictEqual('4');
 		});
 
 		test('(socket_id, event_type)', async () => {
@@ -224,7 +230,7 @@ describe('server -> client', () => {
 			server.sendToSocket(client.id, 'extws_event');
 
 			const event = await promise;
-			expect(event.data).toStrictEqual('4extws_event');
+			expect(event.detail).toStrictEqual('4extws_event');
 		});
 
 		test('(socket_id, data)', async () => {
@@ -233,7 +239,7 @@ describe('server -> client', () => {
 			server.sendToSocket(client.id, { foo: 'bar' });
 
 			const event = await promise;
-			expect(event.data).toStrictEqual('4{"foo":"bar"}');
+			expect(event.detail).toStrictEqual('4{"foo":"bar"}');
 		});
 
 		test('(socket_id, event_type, data)', async () => {
@@ -242,7 +248,7 @@ describe('server -> client', () => {
 			server.sendToSocket(client.id, 'extws_event', { foo: 'bar' });
 
 			const event = await promise;
-			expect(event.data).toStrictEqual('4extws_event{"foo":"bar"}');
+			expect(event.detail).toStrictEqual('4extws_event{"foo":"bar"}');
 		});
 	});
 

@@ -1,10 +1,8 @@
 import { IP } from '@kirick/ip';
+import { NeoEventTarget } from 'neoevents';
 import { customAlphabet } from 'nanoid';
 import { GROUP_PREFIX } from './consts.js';
-import {
-	ExtWSEvent,
-	ExtWSEventTarget,
-} from './event-target.js';
+import { ExtWSEvent } from './event.js';
 import { ExtWS } from './main.js';
 import { buildPayload } from './payload/json.js';
 import {
@@ -24,7 +22,7 @@ export interface ClientOptions {
 	ip: IP;
 }
 
-export class ExtWSClient extends ExtWSEventTarget {
+export class ExtWSClient extends NeoEventTarget {
 	id: string;
 	server: ExtWS;
 	url: URL;

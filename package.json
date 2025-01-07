@@ -1,6 +1,6 @@
 {
 	"name": "@extws/server",
-	"version": "0.2.0-beta.7",
+	"version": "0.2.0-beta.8",
 	"description": "Simple ans powerful WebSocket server.",
 	"publishConfig": {
 		"access": "public"
@@ -21,7 +21,8 @@
 		"node": ">=16.0.0"
 	},
 	"dependencies": {
-		"nanoid": "4.0.2"
+		"nanoid": "4.0.2",
+		"neoevents": "^0.1.0"
 	},
 	"peerDependencies": {
 		"@kirick/ip": "^0.1.1"
@@ -37,7 +38,8 @@
 		"build:ts": "rm -r dist/esm ; tsc",
 		"lint": "eslint . && tsc --skipLibCheck --noemit",
 		"publish:npm": "bun run build && bun run lint && bun run test && npm publish",
-		"test": "vitest run --no-file-parallelism"
+		"test": "vitest run --no-file-parallelism",
+		"# test:note": "# no bun test because it doesn't support fake timers"
 	},
 	"repository": {
 		"type": "git",
@@ -48,7 +50,6 @@
 		"ws",
 		"networking",
 		"json",
-		"cbor",
 		"rtc"
 	],
 	"author": "Daniil Kirichenko (https://twitter.com/kirickme)",

@@ -1,3 +1,4 @@
+import { NeoEventTarget } from 'neoevents';
 import {
 	GROUP_PREFIX,
 	GROUP_BROADCAST,
@@ -7,10 +8,7 @@ import {
 	IDLE_TIMEOUT_PING_MS,
 } from './consts.js';
 import { ExtWSClient } from './client.js';
-import {
-	ExtWSEvent,
-	ExtWSEventTarget,
-} from './event-target.js';
+import { ExtWSEvent } from './event.js';
 import {
 	buildPayload,
 	parsePayload,
@@ -25,7 +23,7 @@ import {
 	OutcomePayloadBroadcastEvent,
 } from './payload/outcome-event.js';
 
-export class ExtWS extends ExtWSEventTarget {
+export class ExtWS extends NeoEventTarget {
 	clients: Map<string, ExtWSClient> = new Map();
 	has_adapter: boolean = false;
 
@@ -247,4 +245,4 @@ export class ExtWS extends ExtWSEventTarget {
 }
 
 export { ExtWSClient } from './client.js';
-export { ExtWSEvent } from './event-target.js';
+export { ExtWSEvent } from './event.js';
