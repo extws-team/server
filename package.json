@@ -28,9 +28,10 @@
 		"@kirick/ip": "^0.1.1"
 	},
 	"devDependencies": {
-		"@kirick/eslint-config": "latest",
+		"@kirick/eslint-config": "^0.1.30",
 		"@types/node": "^22.7.4",
-		"vitest": "^2.1.2"
+		"typescript": "5.5.4",
+		"vitest": "2.1.2"
 	},
 	"scripts": {
 		"build": "rm -r dist ; bun run build:ts && bun run build:cjs",
