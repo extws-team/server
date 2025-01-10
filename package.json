@@ -1,7 +1,7 @@
 {
 	"name": "@extws/server",
 	"version": "0.2.0-beta.8",
-	"description": "Simple ans powerful WebSocket server.",
+	"description": "Base for simple ans powerful WebSocket server",
 	"publishConfig": {
 		"access": "public"
 	},
@@ -35,12 +35,13 @@
 	},
 	"scripts": {
 		"build": "rm -r dist ; bun run build:ts && bun run build:cjs",
-		"build:cjs": "bunx esbuild --bundle --platform=node --format=cjs --packages=external --outfile=dist/main.cjs dist/esm/main.js",
+		"# build:cjs": "bunx esbuild --bundle --platform=node --format=cjs --packages=external --outfile=dist/main.cjs dist/esm/main.js",
+		"build:cjs": "bun build src/main.ts --outfile=dist/main.cjs --platform=node --format=cjs  --packages=external",
 		"build:ts": "rm -r dist/esm ; tsc",
 		"lint": "eslint . && tsc --skipLibCheck --noemit",
-		"publish:npm": "bun run build && bun run lint && bun run test && npm publish",
+		"publish:npm": "bun run lint && bun run build && bun run test && npm publish",
 		"test": "vitest run --no-file-parallelism",
-		"# test:note": "# no bun test because it doesn't support fake timers"
+		"# test:note": "# no bun test because it doesn't support fake timers for setTimeout/setInterval"
 	},
 	"repository": {
 		"type": "git",
