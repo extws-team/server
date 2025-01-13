@@ -62,8 +62,8 @@ Here's an example showing integration pattern using a pseudo WebSocket server:
 import { ExtWS, ExtWSClient } from '@extws/server';
 import { IP } from '@kirick/ip';
 import {
-	FooBarWebSocketServer,
-	type FooBarWebSocketClient,
+  FooBarWebSocketServer,
+  type FooBarWebSocketClient,
 } from '@foobar/websocket-server'; // import WebSocket server you want or use built-in one
 
 // Integrate ExtWS client and real WebSocket client
@@ -298,5 +298,5 @@ client.leave('room1');
 To stop the server, call the `close` method:
 
 ```typescript
-server.close();
+await server.close();
 ```
