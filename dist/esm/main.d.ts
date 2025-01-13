@@ -28,6 +28,7 @@ export declare class ExtWS extends NeoEventTarget {
     private deferClientsWatch;
     private pingSilentClients;
     private disconnectDeadClients;
+    close(): Promise<void>;
 }
 export { ExtWSClient } from './client.js';
 export { ExtWSEvent } from './event.js';

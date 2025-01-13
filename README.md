@@ -141,7 +141,6 @@ class MyServer extends ExtWS {
   }
 
   // Implement group/broadcast messaging
-  // ExtWS calls this method when sending messages to groups
   protected publish(channel: string, payload: string) {
     // Use WebSocket server's capabilities to send message to a specific group (subset of clients)
     this.ws_server.publish(channel, payload);
@@ -292,4 +291,12 @@ server.sendToGroup('room1', 'chat', { message: 'Hello room!' });
 
 // Remove client from group
 client.leave('room1');
+```
+
+## Stopping the server
+
+To stop the server, call the `close` method:
+
+```typescript
+server.close();
 ```

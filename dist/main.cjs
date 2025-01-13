@@ -316,4 +316,7 @@ class ExtWS extends import_neoevents3.NeoEventTarget {
     }
     this.deferClientsWatch();
   }
+  close() {
+    throw new Error("Method not implemented.");
+  }
 }

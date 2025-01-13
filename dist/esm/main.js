@@ -105,6 +105,10 @@ export class ExtWS extends NeoEventTarget {
         }
         this.deferClientsWatch();
     }
+    // eslint-disable-next-line class-methods-use-this
+    close() {
+        throw new Error('Method not implemented.');
+    }
 }
 export { ExtWSClient } from './client.js';
 export { ExtWSEvent } from './event.js';
