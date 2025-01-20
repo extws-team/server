@@ -1,55 +1,40 @@
+import { NeoEvent } from 'neoevents';
+
+export const EVENT_TYPE_SOCKET = 'p.socket';
+export const EVENT_TYPE_GROUP = 'p.group';
+export const EVENT_TYPE_BROADCAST = 'p.broadcast';
+
 export enum OutcomePayloadEventType {
-	SOCKET = 'p.socket',
-	GROUP = 'p.group',
-	BROADCAST = 'p.broadcast',
+	SOCKET = EVENT_TYPE_SOCKET,
+	GROUP = EVENT_TYPE_GROUP,
+	BROADCAST = EVENT_TYPE_BROADCAST,
 }
 
-class OutcomePayloadEvent extends Event {
-	payload: string;
-
+export class OutcomePayloadSocketEvent extends NeoEvent<string> {
 	constructor(
-		type: OutcomePayloadEventType,
-		payload: string,
-	) {
-		super(type);
-
-		this.payload = payload;
-	}
-}
-
-export class OutcomePayloadSocketEvent extends OutcomePayloadEvent {
-	socket_id: string;
-
-	constructor(
-		socket_id: string,
+		public socket_id: string,
 		payload: string,
 	) {
 		super(
 			OutcomePayloadEventType.SOCKET,
 			payload,
 		);
-
-		this.socket_id = socket_id;
 	}
 }
 
-export class OutcomePayloadGroupEvent extends OutcomePayloadEvent {
-	group_id: string;
-
+export class OutcomePayloadGroupEvent extends NeoEvent<string> {
 	constructor(
-		group_id: string,
+		public group_id: string,
 		payload: string,
 	) {
 		super(
 			OutcomePayloadEventType.GROUP,
 			payload,
 		);
-
-		this.group_id = group_id;
 	}
 }
 
-export class OutcomePayloadBroadcastEvent extends OutcomePayloadEvent {
+export class OutcomePayloadBroadcastEvent extends NeoEvent<string> {
 	constructor(payload: string) {
 		super(
 			OutcomePayloadEventType.BROADCAST,

@@ -18,12 +18,25 @@ import {
 	type PayloadData,
 } from './payload/types.js';
 import {
+	EVENT_TYPE_SOCKET,
+	EVENT_TYPE_GROUP,
+	EVENT_TYPE_BROADCAST,
 	OutcomePayloadSocketEvent,
 	OutcomePayloadGroupEvent,
 	OutcomePayloadBroadcastEvent,
 } from './payload/outcome-event.js';
 
-export class ExtWS extends NeoEventTarget {
+type EventMap = {
+	connect: ExtWSEvent<undefined>,
+	disconnect: ExtWSEvent<undefined>,
+	[EVENT_TYPE_SOCKET]: OutcomePayloadSocketEvent,
+	[EVENT_TYPE_GROUP]: OutcomePayloadGroupEvent,
+	[EVENT_TYPE_BROADCAST]: OutcomePayloadBroadcastEvent,
+} & {
+	[key: string]: ExtWSEvent,
+};
+
+export class ExtWS extends NeoEventTarget<EventMap> {
 	clients: Map<string, ExtWSClient> = new Map();
 	has_adapter: boolean = false;
 

@@ -1,4 +1,4 @@
-import type { NeoEvent } from 'neoevents';
+/* eslint-disable max-lines */
 import {
 	beforeEach,
 	describe,
@@ -17,13 +17,9 @@ import {
 	TestPublishEvent,
 } from '../test/server.js';
 import { OutcomePayloadEventType } from './payload/outcome-event.js';
+import { type ExtWSEvent } from './event.js';
 
 const server = new ExtWSTest();
-
-interface OutcomePayload extends Event {
-	group_id?: string;
-	payload: string;
-}
 
 /**
  * Resolves if the given promise hangs.
@@ -60,20 +56,20 @@ describe('ExtWS', () => {
 	});
 
 	test('addToGroup', async () => {
-		const promise = server.wait<NeoEvent<{ group: string }>>('test.addToGroup');
+		const promise = server.wait('test.addToGroup');
 
 		server.open();
 
-		const event = await promise;
+		const event = await promise as ExtWSEvent<{ group: string }>;
 
 		expect(event.detail.group).toBe(GROUP_BROADCAST);
 	});
 
 	test('sendPayload', async () => {
-		const promise = server.wait<NeoEvent<string>>('test.sendPayload');
+		const promise = server.wait('test.sendPayload');
 		server.open();
 
-		const event = await promise;
+		const event = await promise as ExtWSEvent<string>;
 		const startsWith = event.detail.startsWith('1{"');
 		expect(startsWith).toBe(true);
 	});
@@ -84,7 +80,7 @@ describe('ExtWS', () => {
 		const server_local = new ExtWSTest();
 		server_local.open();
 
-		const promise_ping = server_local.wait<NeoEvent<string>>('test.sendPayload');
+		const promise_ping = server_local.wait('test.sendPayload');
 		const promise_disconnect = server_local.wait('disconnect');
 
 		vi.advanceTimersByTime(IDLE_TIMEOUT_PING_MS);
@@ -118,19 +114,19 @@ describe('client', () => {
 	describe('groups', () => {
 		test('join', async () => {
 			const client = server.open();
-			const promise = server.wait<NeoEvent<{ group: string }>>('test.addToGroup');
+			const promise = server.wait('test.addToGroup');
 			client?.join('foo');
 
-			const event = await promise;
+			const event = await promise as ExtWSEvent<{ group: string }>;
 			expect(event.detail.group).toBe(`${GROUP_PREFIX}foo`);
 		});
 
 		test('remove', async () => {
 			const client = server.open();
-			const promise = server.wait<NeoEvent<{ group: string }>>('test.removeFromGroup');
+			const promise = server.wait('test.removeFromGroup');
 			client?.leave('foo');
 
-			const event = await promise;
+			const event = await promise as ExtWSEvent<{ group: string }>;
 			expect(event.detail.group).toBe(`${GROUP_PREFIX}foo`);
 		});
 	});
@@ -149,7 +145,7 @@ describe('client', () => {
 describe('client -> server', () => {
 	test('onMessage with no type', async () => {
 		const client = server.open();
-		const promise = server.wait<NeoEvent>('message');
+		const promise = server.wait('message');
 		server.onMessage(client, '4{"foo":"boo"}');
 
 		const event = await promise;
@@ -159,7 +155,7 @@ describe('client -> server', () => {
 
 	test('onMessage with type', async () => {
 		const client = server.open();
-		const promise = server.wait<NeoEvent>('extws');
+		const promise = server.wait('extws');
 		server.onMessage(client, '4extws{"foo":"boo"}');
 
 		const event = await promise;
@@ -254,41 +250,57 @@ describe('server -> client', () => {
 
 	describe('server.sendToGroup', () => {
 		test('(group_id)', async () => {
-			const promise = server.wait<TestPublishEvent>(TestPublishEvent.type);
+			const promise = server.wait(TestPublishEvent.type);
 
 			server.sendToGroup('channel');
 
 			const event = await promise;
+			if (event instanceof TestPublishEvent !== true) {
+				throw new TypeError('Invalid event type');
+			}
+
 			expect(event.group_id).toBe('g-channel');
 			expect(event.payload).toBe('4');
 		});
 
 		test('(group_id, event_type)', async () => {
-			const promise = server.wait<TestPublishEvent>(TestPublishEvent.type);
+			const promise = server.wait(TestPublishEvent.type);
 
 			server.sendToGroup('channel', 'extws_event');
 
 			const event = await promise;
+			if (event instanceof TestPublishEvent !== true) {
+				throw new TypeError('Invalid event type');
+			}
+
 			expect(event.group_id).toBe('g-channel');
 			expect(event.payload).toStrictEqual('4extws_event');
 		});
 
 		test('(group_id, data)', async () => {
-			const promise = server.wait<TestPublishEvent>(TestPublishEvent.type);
+			const promise = server.wait(TestPublishEvent.type);
 
 			server.sendToGroup('channel', { foo: 'bar' });
 
 			const event = await promise;
+			if (event instanceof TestPublishEvent !== true) {
+				throw new TypeError('Invalid event type');
+			}
+
 			expect(event.group_id).toBe('g-channel');
 			expect(event.payload).toStrictEqual('4{"foo":"bar"}');
 		});
 
 		test('(group_id, event_type, data)', async () => {
-			const promise = server.wait<TestPublishEvent>(TestPublishEvent.type);
+			const promise = server.wait(TestPublishEvent.type);
 
 			server.sendToGroup('channel', 'extws_event', { foo: 'bar' });
 
 			const event = await promise;
+			if (event instanceof TestPublishEvent !== true) {
+				throw new TypeError('Invalid event type');
+			}
+
 			expect(event.group_id).toBe('g-channel');
 			expect(event.payload).toStrictEqual('4extws_event{"foo":"bar"}');
 		});
@@ -296,41 +308,57 @@ describe('server -> client', () => {
 
 	describe('server.broadcast', () => {
 		test('()', async () => {
-			const promise = server.wait<TestPublishEvent>(TestPublishEvent.type);
+			const promise = server.wait(TestPublishEvent.type);
 
 			server.broadcast();
 
 			const event = await promise;
+			if (event instanceof TestPublishEvent !== true) {
+				throw new TypeError('Invalid event type');
+			}
+
 			expect(event.group_id).toStrictEqual('broadcast');
 			expect(event.payload).toStrictEqual('4');
 		});
 
 		test('(event_type)', async () => {
-			const promise = server.wait<TestPublishEvent>(TestPublishEvent.type);
+			const promise = server.wait(TestPublishEvent.type);
 
 			server.broadcast('extws_event');
 
 			const event = await promise;
+			if (event instanceof TestPublishEvent !== true) {
+				throw new TypeError('Invalid event type');
+			}
+
 			expect(event.group_id).toStrictEqual('broadcast');
 			expect(event.payload).toStrictEqual('4extws_event');
 		});
 
 		test('(data)', async () => {
-			const promise = server.wait<TestPublishEvent>(TestPublishEvent.type);
+			const promise = server.wait(TestPublishEvent.type);
 
 			server.broadcast({ foo: 'bar' });
 
 			const event = await promise;
+			if (event instanceof TestPublishEvent !== true) {
+				throw new TypeError('Invalid event type');
+			}
+
 			expect(event.group_id).toStrictEqual('broadcast');
 			expect(event.payload).toStrictEqual('4{"foo":"bar"}');
 		});
 
 		test('(event_type, data)', async () => {
-			const promise = server.wait<TestPublishEvent>(TestPublishEvent.type);
+			const promise = server.wait(TestPublishEvent.type);
 
 			server.broadcast('extws_event', { foo: 'bar' });
 
 			const event = await promise;
+			if (event instanceof TestPublishEvent !== true) {
+				throw new TypeError('Invalid event type');
+			}
+
 			expect(event.group_id).toStrictEqual('broadcast');
 			expect(event.payload).toStrictEqual('4extws_event{"foo":"bar"}');
 		});
@@ -380,30 +408,30 @@ describe('adapter', () => {
 		});
 
 		test('sendToSocket', async () => {
-			const promise = server.wait<OutcomePayload>(OutcomePayloadEventType.SOCKET);
+			const promise = server.wait(OutcomePayloadEventType.SOCKET);
 
 			server.sendToSocket('777', { foo: 'bar' });
 
 			const event = await promise;
-			expect(event.payload).toStrictEqual('4{"foo":"bar"}');
+			expect(event.detail).toStrictEqual('4{"foo":"bar"}');
 		});
 
 		test('sendToGroup', async () => {
-			const promise = server.wait<OutcomePayload>(OutcomePayloadEventType.GROUP);
+			const promise = server.wait(OutcomePayloadEventType.GROUP);
 
 			server.sendToGroup('channel', { foo: 'bar' });
 
 			const event = await promise;
-			expect(event.payload).toStrictEqual('4{"foo":"bar"}');
+			expect(event.detail).toStrictEqual('4{"foo":"bar"}');
 		});
 
 		test('broadcast', async () => {
-			const promise = server.wait<OutcomePayload>(OutcomePayloadEventType.BROADCAST);
+			const promise = server.wait(OutcomePayloadEventType.BROADCAST);
 
 			server.broadcast({ foo: 'bar' });
 
 			const event = await promise;
-			expect(event.payload).toStrictEqual('4{"foo":"bar"}');
+			expect(event.detail).toStrictEqual('4{"foo":"bar"}');
 		});
 	});
 });

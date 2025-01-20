@@ -34,7 +34,7 @@ __export(exports_main, {
   ExtWS: () => ExtWS
 });
 module.exports = __toCommonJS(exports_main);
-var import_neoevents3 = require("neoevents");
+var import_neoevents4 = require("neoevents");
 
 // src/consts.ts
 var IDLE_TIMEOUT = 60;
@@ -54,11 +54,9 @@ var import_neoevents = require("neoevents");
 
 class ExtWSEvent extends import_neoevents.NeoEvent {
   client;
-  data;
   constructor(type, client, data) {
     super(type, data);
     this.client = client;
-    this.data = data;
   }
 }
 
@@ -192,38 +190,41 @@ class ExtWSClient extends import_neoevents2.NeoEventTarget {
 }
 
 // src/payload/outcome-event.ts
-class OutcomePayloadEvent extends Event {
-  payload;
-  constructor(type, payload) {
-    super(type);
-    this.payload = payload;
-  }
-}
+var import_neoevents3 = require("neoevents");
+var EVENT_TYPE_SOCKET = "p.socket";
+var EVENT_TYPE_GROUP = "p.group";
+var EVENT_TYPE_BROADCAST = "p.broadcast";
+var OutcomePayloadEventType;
+((OutcomePayloadEventType2) => {
+  OutcomePayloadEventType2[OutcomePayloadEventType2["SOCKET"] = EVENT_TYPE_SOCKET] = "SOCKET";
+  OutcomePayloadEventType2[OutcomePayloadEventType2["GROUP"] = EVENT_TYPE_GROUP] = "GROUP";
+  OutcomePayloadEventType2[OutcomePayloadEventType2["BROADCAST"] = EVENT_TYPE_BROADCAST] = "BROADCAST";
+})(OutcomePayloadEventType ||= {});
 
-class OutcomePayloadSocketEvent extends OutcomePayloadEvent {
+class OutcomePayloadSocketEvent extends import_neoevents3.NeoEvent {
   socket_id;
   constructor(socket_id, payload) {
-    super("p.socket" /* SOCKET */, payload);
+    super(OutcomePayloadEventType.SOCKET, payload);
     this.socket_id = socket_id;
   }
 }
 
-class OutcomePayloadGroupEvent extends OutcomePayloadEvent {
+class OutcomePayloadGroupEvent extends import_neoevents3.NeoEvent {
   group_id;
   constructor(group_id, payload) {
-    super("p.group" /* GROUP */, payload);
+    super(OutcomePayloadEventType.GROUP, payload);
     this.group_id = group_id;
   }
 }
 
-class OutcomePayloadBroadcastEvent extends OutcomePayloadEvent {
+class OutcomePayloadBroadcastEvent extends import_neoevents3.NeoEvent {
   constructor(payload) {
-    super("p.broadcast" /* BROADCAST */, payload);
+    super(OutcomePayloadEventType.BROADCAST, payload);
   }
 }
 
 // src/main.ts
-class ExtWS extends import_neoevents3.NeoEventTarget {
+class ExtWS extends import_neoevents4.NeoEventTarget {
   clients = new Map;
   has_adapter = false;
   constructor() {

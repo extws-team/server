@@ -1,12 +1,11 @@
 import { NeoEvent } from 'neoevents';
 import { ExtWSClient } from './main.js';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export class ExtWSEvent<D = any> extends NeoEvent {
+export class ExtWSEvent<D = unknown> extends NeoEvent<D> {
 	constructor(
 		type: string,
 		public client: ExtWSClient,
-		public data: D,
+		data: D,
 	) {
 		super(type, data);
 	}

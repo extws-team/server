@@ -4,7 +4,7 @@ import { ExtWSClient } from './client.js';
 import { ExtWSEvent } from './event.js';
 import { buildPayload, parsePayload, } from './payload/json.js';
 import { PayloadType, } from './payload/types.js';
-import { OutcomePayloadSocketEvent, OutcomePayloadGroupEvent, OutcomePayloadBroadcastEvent, } from './payload/outcome-event.js';
+import { EVENT_TYPE_SOCKET, EVENT_TYPE_GROUP, EVENT_TYPE_BROADCAST, OutcomePayloadSocketEvent, OutcomePayloadGroupEvent, OutcomePayloadBroadcastEvent, } from './payload/outcome-event.js';
 export class ExtWS extends NeoEventTarget {
     clients = new Map();
     has_adapter = false;
