@@ -19,7 +19,7 @@ import {
 import { OutcomePayloadEventType } from './payload/outcome-event.js';
 import { type ExtWSEvent } from './event.js';
 
-const server = new ExtWSTest();
+const server = new ExtWSTest({});
 
 /**
  * Resolves if the given promise hangs.
@@ -77,7 +77,7 @@ describe('ExtWS', () => {
 	test('ping & disconnect if client is silent', async () => {
 		vi.useFakeTimers();
 
-		const server_local = new ExtWSTest();
+		const server_local = new ExtWSTest({});
 		server_local.open();
 
 		const promise_ping = server_local.wait('test.sendPayload');

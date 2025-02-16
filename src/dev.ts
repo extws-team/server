@@ -18,4 +18,7 @@ export {
 export {
 	PayloadType,
 	type PayloadData,
+	type Promisable,
+	type ExtWSHttpResponse,
+	type ExtWSOnBeforeUpgradeHandler,
 } from './payload/types.js';

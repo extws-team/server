@@ -1,3 +1,5 @@
+import type { ExtWSClient } from '../main.js';
+
 export type Promisable<T> = T | Promise<T>;
 
 export type PayloadData = Record<string, unknown> | unknown[];
@@ -14,3 +16,14 @@ export enum PayloadType {
 	PONG = 3,
 	MESSAGE = 4,
 }
+
+export type ExtWSHttpResponse = {
+	status: number,
+	headers: ExtWSClient['headers'],
+	body: string,
+};
+
+export type ExtWSOnBeforeUpgradeHandler = (
+	url: ExtWSClient['url'],
+	headers: ExtWSClient['headers'],
+) => Promisable<ExtWSHttpResponse | undefined>;
