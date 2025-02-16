@@ -1,3 +1,4 @@
+export type Promisable<T> = T | Promise<T>;
 export type PayloadData = Record<string, unknown> | unknown[];
 export interface Payload {
     payload_type: PayloadType;

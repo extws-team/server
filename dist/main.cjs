@@ -225,10 +225,12 @@ class OutcomePayloadBroadcastEvent extends import_neoevents3.NeoEvent {
 
 // src/main.ts
 class ExtWS extends import_neoevents4.NeoEventTarget {
+  options;
   clients = new Map;
   has_adapter = false;
-  constructor() {
+  constructor(options) {
     super();
+    this.options = options;
     this.deferClientsWatch();
   }
   onConnect(client) {

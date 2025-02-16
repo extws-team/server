@@ -6,10 +6,12 @@ import { buildPayload, parsePayload, } from './payload/json.js';
 import { PayloadType, } from './payload/types.js';
 import { EVENT_TYPE_SOCKET, EVENT_TYPE_GROUP, EVENT_TYPE_BROADCAST, OutcomePayloadSocketEvent, OutcomePayloadGroupEvent, OutcomePayloadBroadcastEvent, } from './payload/outcome-event.js';
 export class ExtWS extends NeoEventTarget {
+    options;
     clients = new Map();
     has_adapter = false;
-    constructor() {
+    constructor(options) {
         super();
+        this.options = options;
         this.deferClientsWatch();
     }
     onConnect(client) {

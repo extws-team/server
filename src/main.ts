@@ -14,6 +14,7 @@ import {
 	parsePayload,
 } from './payload/json.js';
 import {
+	type Promisable,
 	PayloadType,
 	type PayloadData,
 } from './payload/types.js';
@@ -36,11 +37,23 @@ type EventMap = {
 	[key: string]: ExtWSEvent,
 };
 
+type ExtWSHttpResponse = {
+	status: number,
+	headers: ExtWSClient['headers'],
+	body: string,
+};
+
 export class ExtWS extends NeoEventTarget<EventMap> {
 	clients: Map<string, ExtWSClient> = new Map();
 	has_adapter: boolean = false;
 
-	constructor() {
+	constructor(protected options?: {
+		// TODO: replace with Response
+		onBeforeUpgrade?: (
+			url: ExtWSClient['url'],
+			headers: ExtWSClient['headers'],
+		) => Promisable<ExtWSHttpResponse | undefined>,
+	}) {
 		super();
 
 		this.deferClientsWatch();

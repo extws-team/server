@@ -2,11 +2,11 @@ import { PayloadType, } from './types.js';
 const PRINT_ERRORS = process.env.NODE_ENV === 'development'
     || process.env.NODE_ENV === 'test';
 /**
- * Build a payload.
+ * Builds a payload.
  * @param payload_type The type of the payload.
  * @param argument1 (Optional) Event type or payload data.
  * @param argument2 (Optional) Payload data.
- * @returns The payload.
+ * @returns -
  */
 export function buildPayload(payload_type, argument1, argument2) {
     let payload = String(payload_type);

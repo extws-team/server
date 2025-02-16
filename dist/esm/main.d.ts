@@ -1,7 +1,7 @@
 import { NeoEventTarget } from 'neoevents';
 import { ExtWSClient } from './client.js';
 import { ExtWSEvent } from './event.js';
-import { type PayloadData } from './payload/types.js';
+import { type Promisable, type PayloadData } from './payload/types.js';
 import { EVENT_TYPE_SOCKET, EVENT_TYPE_GROUP, EVENT_TYPE_BROADCAST, OutcomePayloadSocketEvent, OutcomePayloadGroupEvent, OutcomePayloadBroadcastEvent } from './payload/outcome-event.js';
 type EventMap = {
     connect: ExtWSEvent<undefined>;
@@ -12,10 +12,20 @@ type EventMap = {
 } & {
     [key: string]: ExtWSEvent;
 };
+type ExtWSHttpResponse = {
+    status: number;
+    headers: ExtWSClient['headers'];
+    body: string;
+};
 export declare class ExtWS extends NeoEventTarget<EventMap> {
+    protected options?: {
+        onBeforeUpgrade?: (url: ExtWSClient["url"], headers: ExtWSClient["headers"]) => Promisable<ExtWSHttpResponse | undefined>;
+    } | undefined;
     clients: Map<string, ExtWSClient>;
     has_adapter: boolean;
-    constructor();
+    constructor(options?: {
+        onBeforeUpgrade?: (url: ExtWSClient["url"], headers: ExtWSClient["headers"]) => Promisable<ExtWSHttpResponse | undefined>;
+    } | undefined);
     protected onConnect(client: ExtWSClient): void;
     protected onMessage(client: ExtWSClient, payload: string | Buffer): void;
     sendToSocket(socket_id: string): void;
