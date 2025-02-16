@@ -14,7 +14,8 @@
 			"require": "./dist/main.cjs"
 		},
 		"./dev": {
-			"import": "./dist/esm/dev.js"
+			"import": "./dist/esm/dev.js",
+			"types": "./dist/esm/dev.d.ts"
 		}
 	},
 	"engines": {
