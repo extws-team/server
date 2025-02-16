@@ -24,6 +24,9 @@ export type ExtWSHttpResponse = {
 };
 
 export type ExtWSOnBeforeUpgradeHandler = (
-	url: ExtWSClient['url'],
-	headers: ExtWSClient['headers'],
+	options: {
+		url: ExtWSClient['url'],
+		headers: ExtWSClient['headers'],
+		ip: ExtWSClient['ip'],
+	},
 ) => Promisable<ExtWSHttpResponse | undefined>;

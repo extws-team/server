@@ -18,4 +18,8 @@ export type ExtWSHttpResponse = {
     headers?: ExtWSClient['headers'];
     body?: string;
 };
-export type ExtWSOnBeforeUpgradeHandler = (url: ExtWSClient['url'], headers: ExtWSClient['headers']) => Promisable<ExtWSHttpResponse | undefined>;
+export type ExtWSOnBeforeUpgradeHandler = (options: {
+    url: ExtWSClient['url'];
+    headers: ExtWSClient['headers'];
+    ip: ExtWSClient['ip'];
+}) => Promisable<ExtWSHttpResponse | undefined>;
