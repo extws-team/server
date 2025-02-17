@@ -1,6 +1,6 @@
 {
 	"name": "@extws/server",
-	"version": "0.2.1-beta.1",
+	"version": "0.2.1-dev",
 	"description": "Base for simple ans powerful WebSocket server",
 	"publishConfig": {
 		"access": "public"
@@ -11,10 +11,12 @@
 	"exports": {
 		".": {
 			"import": "./dist/esm/main.js",
-			"require": "./dist/main.cjs"
+			"require": "./dist/cjs/main.js",
+			"types": "./dist/esm/main.d.ts"
 		},
 		"./dev": {
 			"import": "./dist/esm/dev.js",
+			"require": "./dist/cjs/dev.js",
 			"types": "./dist/esm/dev.d.ts"
 		}
 	},
@@ -36,11 +38,10 @@
 		"vitest": "2.1.2"
 	},
 	"scripts": {
-		"build": "rm -r dist ; bun run build:ts && bun run build:cjs",
-		"build:cjs": "bun build src/main.ts --outfile=dist/main.cjs --platform=node --format=cjs --packages=external",
-		"build:ts": "rm -r dist/esm ; tsc",
+		"build": "rm -r dist ; bun run build:esm && bun run build:cjs",
+		"build:cjs": "rm -r dist/cjs ; tsc --project tsconfig.cjs.json",
+		"build:esm": "rm -r dist/esm ; tsc",
 		"lint": "eslint . && tsc --skipLibCheck --noemit",
-		"publish:npm": "bun run lint && bun run build && bun run test && npm publish",
 		"test": "vitest run --no-file-parallelism",
 		"# test:note": "# no bun test because it doesn't support fake timers for setTimeout/setInterval"
 	},

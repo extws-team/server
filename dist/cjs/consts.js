@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.GROUP_PREFIX = exports.GROUP_BROADCAST = exports.IDLE_TIMEOUT_PING_MS = exports.TIMEFRAME_PING_DISCONNECT_MS = exports.IDLE_TIMEOUT_DISCONNECT_MS = exports.TIMEFRAME_PING_DISCONNECT = exports.IDLE_TIMEOUT = void 0;
+exports.IDLE_TIMEOUT = 60;
+exports.TIMEFRAME_PING_DISCONNECT = 5;
+exports.IDLE_TIMEOUT_DISCONNECT_MS = exports.IDLE_TIMEOUT * 1e3;
+exports.TIMEFRAME_PING_DISCONNECT_MS = exports.TIMEFRAME_PING_DISCONNECT * 1e3;
+exports.IDLE_TIMEOUT_PING_MS = exports.IDLE_TIMEOUT_DISCONNECT_MS - exports.TIMEFRAME_PING_DISCONNECT_MS;
+exports.GROUP_BROADCAST = 'broadcast';
+exports.GROUP_PREFIX = 'g-';
