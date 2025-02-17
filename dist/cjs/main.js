@@ -2,12 +2,12 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ExtWSEvent = exports.ExtWSClient = exports.ExtWS = void 0;
 const neoevents_1 = require("neoevents");
-const consts_js_1 = require("./consts.cjs");
-const client_js_1 = require("./client.cjs");
-const event_js_1 = require("./event.cjs");
-const json_js_1 = require("./payload/json.cjs");
-const types_js_1 = require("./payload/types.cjs");
-const outcome_event_js_1 = require("./payload/outcome-event.cjs");
+const consts_js_1 = require("./consts.js");
+const client_js_1 = require("./client.js");
+const event_js_1 = require("./event.js");
+const json_js_1 = require("./payload/json.js");
+const types_js_1 = require("./payload/types.js");
+const outcome_event_js_1 = require("./payload/outcome-event.js");
 class ExtWS extends neoevents_1.NeoEventTarget {
     options;
     clients = new Map();
@@ -116,7 +116,7 @@ class ExtWS extends neoevents_1.NeoEventTarget {
     }
 }
 exports.ExtWS = ExtWS;
-var client_js_2 = require("./client.cjs");
+var client_js_2 = require("./client.js");
 Object.defineProperty(exports, "ExtWSClient", { enumerable: true, get: function () { return client_js_2.ExtWSClient; } });
-var event_js_2 = require("./event.cjs");
+var event_js_2 = require("./event.js");
 Object.defineProperty(exports, "ExtWSEvent", { enumerable: true, get: function () { return event_js_2.ExtWSEvent; } });
