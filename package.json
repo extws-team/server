@@ -39,7 +39,7 @@
 	},
 	"scripts": {
 		"build": "rm -r dist ; bun run build:esm && bun run build:cjs",
-		"build:cjs": "rm -r dist/cjs ; tsc --project tsconfig.cjs.json",
+		"build:cjs": "rm -r dist/cjs ; tsc --project tsconfig.cjs.json && (find dist/cjs -name '*.js' -exec sh -c 'mv $0 ${0%.js}.cjs' {} \\;)",
 		"build:esm": "rm -r dist/esm ; tsc",
 		"lint": "eslint . && tsc --skipLibCheck --noemit",
 		"test": "vitest run --no-file-parallelism",
