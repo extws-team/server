@@ -15,7 +15,7 @@ export declare enum PayloadType {
 }
 export type ExtWSHttpResponse = {
     status: number;
-    headers?: ExtWSClient['headers'];
+    headers?: Record<string, string | undefined>;
     body?: string;
 };
 export type ExtWSOnBeforeUpgradeHandler = (options: {

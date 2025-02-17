@@ -19,7 +19,7 @@ export enum PayloadType {
 
 export type ExtWSHttpResponse = {
 	status: number,
-	headers?: ExtWSClient['headers'],
+	headers?: Record<string, string | undefined>,
 	body?: string,
 };
 
