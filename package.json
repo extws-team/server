@@ -39,8 +39,9 @@
 	},
 	"scripts": {
 		"build": "rm -r dist ; bun run build:esm && bun run build:cjs",
-		"build:cjs": "rm -r dist/cjs ; tsc --project tsconfig.cjs.json && (find dist/cjs -name '*.js' -exec sh -c 'mv $0 ${0%.js}.cjs' {} \\;)",
+		"build:cjs": "rm -r dist/cjs ; tsc --project tsconfig.cjs.json && (for file in $(find dist/cjs -type f -name '*.js') ; do sed -i '' 's/require(\"\\(.*\\)\\.js\"/require(\"\\1.cjs\"/g' $file && mv $file ${file%.js}.cjs ; done)",
 		"build:esm": "rm -r dist/esm ; tsc",
+		"check": "bun run lint && bun run build && bun run test",
 		"lint": "eslint . && tsc --skipLibCheck --noemit",
 		"test": "vitest run --no-file-parallelism",
 		"# test:note": "# no bun test because it doesn't support fake timers for setTimeout/setInterval"

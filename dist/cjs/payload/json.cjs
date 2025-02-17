@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.buildPayload = buildPayload;
 exports.parsePayload = parsePayload;
-const types_js_1 = require("./types.js");
+const types_js_1 = require("./types.cjs");
 const PRINT_ERRORS = process.env.NODE_ENV === 'development'
     || process.env.NODE_ENV === 'test';
 /**

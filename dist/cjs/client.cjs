@@ -3,10 +3,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ExtWSClient = void 0;
 const neoevents_1 = require("neoevents");
 const nanoid_1 = require("nanoid");
-const consts_js_1 = require("./consts.js");
-const event_js_1 = require("./event.js");
-const json_js_1 = require("./payload/json.js");
-const types_js_1 = require("./payload/types.js");
+const consts_js_1 = require("./consts.cjs");
+const event_js_1 = require("./event.cjs");
+const json_js_1 = require("./payload/json.cjs");
+const types_js_1 = require("./payload/types.cjs");
 const nanoid = (0, nanoid_1.customAlphabet)('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 16);
 class ExtWSClient extends neoevents_1.NeoEventTarget {
     id;
