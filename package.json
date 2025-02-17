@@ -11,12 +11,12 @@
 	"exports": {
 		".": {
 			"import": "./dist/esm/main.js",
-			"require": "./dist/cjs/main.cjs",
+			"require": "./dist/cjs/main.js",
 			"types": "./dist/esm/main.d.ts"
 		},
 		"./dev": {
 			"import": "./dist/esm/dev.js",
-			"require": "./dist/cjs/dev.cjs",
+			"require": "./dist/cjs/dev.js",
 			"types": "./dist/esm/dev.d.ts"
 		}
 	},
