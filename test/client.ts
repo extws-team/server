@@ -1,17 +1,8 @@
-import {
-	ExtWSClient,
-	type ClientOptions,
-} from '../src/client.js';
+import { ExtWSClient } from '../src/client.js';
 import { ExtWSEvent } from '../src/event.js';
-import { ExtWS } from '../src/main.js';
 
 export class ExtWSTestClient extends ExtWSClient {
-	private groups: Map<string, Set<ExtWSClient>>;
-
-	constructor(server: ExtWS, options: ClientOptions) {
-		super(server, options);
-		this.groups = new Map();
-	}
+	private channels = new Map<string, Set<ExtWSClient>>();
 
 	protected sendPayload(payload: string) {
 		const event = new ExtWSEvent(
@@ -23,37 +14,37 @@ export class ExtWSTestClient extends ExtWSClient {
 		this.server.dispatchEvent(event);
 	}
 
-	protected addToGroup(group_id: string) {
+	protected addToChannel(channel_id: string) {
 		const event = new ExtWSEvent(
-			'test.addToGroup',
+			'test.addToChannel',
 			this,
 			{
-				group: group_id,
+				channel: channel_id,
 			},
 		);
 
-		if (!this.groups.has(group_id)) {
-			this.groups.set(group_id, new Set());
+		if (!this.channels.has(channel_id)) {
+			this.channels.set(channel_id, new Set());
 			this.server.dispatchEvent(event);
 		}
 
-		const group = this.groups.get(group_id);
+		const group = this.channels.get(channel_id);
 		if (group) {
 			group.add(this);
 			this.server.dispatchEvent(event);
 		}
 	}
 
-	protected removeFromGroup(group_id: string) {
+	protected removeFromChannel(channel_id: string) {
 		const event = new ExtWSEvent(
-			'test.removeFromGroup',
+			'test.removeFromChannel',
 			this,
 			{
-				group: group_id,
+				channel: channel_id,
 			},
 		);
 
-		this.groups.delete(group_id);
+		this.channels.delete(channel_id);
 		this.server.dispatchEvent(event);
 	}
 }

@@ -1,6 +1,6 @@
 export {
-	GROUP_BROADCAST,
-	GROUP_PREFIX,
+	CHANNEL_BROADCAST,
+	CHANNEL_GROUP_PREFIX,
 } from './consts.js';
 
 export {
@@ -11,8 +11,7 @@ export {
 export {
 	OutcomePayloadEventType,
 	OutcomePayloadSocketEvent,
-	OutcomePayloadGroupEvent,
-	OutcomePayloadBroadcastEvent,
+	OutcomePayloadChannelEvent,
 } from './payload/outcome-event.js';
 
 export {

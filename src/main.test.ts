@@ -9,8 +9,8 @@ import {
 import {
 	TIMEFRAME_PING_DISCONNECT_MS,
 	IDLE_TIMEOUT_PING_MS,
-	GROUP_BROADCAST,
-	GROUP_PREFIX,
+	CHANNEL_BROADCAST,
+	CHANNEL_GROUP_PREFIX,
 } from '../src/consts.js';
 import {
 	ExtWSTest,
@@ -56,13 +56,15 @@ describe('ExtWS', () => {
 	});
 
 	test('addToGroup', async () => {
-		const promise = server.wait('test.addToGroup');
+		const promise = server.wait('test.addToChannel');
 
 		server.open();
 
-		const event = await promise as ExtWSEvent<{ group: string }>;
+		const event = await promise;
 
-		expect(event.detail.group).toBe(GROUP_BROADCAST);
+		expect(event.detail).toStrictEqual({
+			channel: CHANNEL_BROADCAST,
+		});
 	});
 
 	test('sendPayload', async () => {
@@ -114,20 +116,24 @@ describe('client', () => {
 	describe('groups', () => {
 		test('join', async () => {
 			const client = server.open();
-			const promise = server.wait('test.addToGroup');
+			const promise = server.wait('test.addToChannel');
 			client?.join('foo');
 
-			const event = await promise as ExtWSEvent<{ group: string }>;
-			expect(event.detail.group).toBe(`${GROUP_PREFIX}foo`);
+			const event = await promise;
+			expect(event.detail).toStrictEqual({
+				channel: `${CHANNEL_GROUP_PREFIX}foo`,
+			});
 		});
 
 		test('remove', async () => {
 			const client = server.open();
-			const promise = server.wait('test.removeFromGroup');
+			const promise = server.wait('test.removeFromChannel');
 			client?.leave('foo');
 
 			const event = await promise as ExtWSEvent<{ group: string }>;
-			expect(event.detail.group).toBe(`${GROUP_PREFIX}foo`);
+			expect(event.detail).toStrictEqual({
+				channel: `${CHANNEL_GROUP_PREFIX}foo`,
+			});
 		});
 	});
 
@@ -383,7 +389,7 @@ describe('adapter', () => {
 
 		test('sendToGroup', async () => {
 			const promise = shouldHang(
-				server.wait(OutcomePayloadEventType.GROUP),
+				server.wait(OutcomePayloadEventType.CHANNEL),
 			);
 
 			server.sendToGroup('channel', { foo: 'bar' });
@@ -393,7 +399,7 @@ describe('adapter', () => {
 
 		test('broadcast', async () => {
 			const promise = shouldHang(
-				server.wait(OutcomePayloadEventType.BROADCAST),
+				server.wait(OutcomePayloadEventType.CHANNEL),
 			);
 
 			server.broadcast({ foo: 'bar' });
@@ -417,20 +423,22 @@ describe('adapter', () => {
 		});
 
 		test('sendToGroup', async () => {
-			const promise = server.wait(OutcomePayloadEventType.GROUP);
+			const promise = server.wait(OutcomePayloadEventType.CHANNEL);
 
-			server.sendToGroup('channel', { foo: 'bar' });
+			server.sendToGroup('foo', { foo: 'bar' });
 
 			const event = await promise;
+			expect(event.channel_id).toBe(`${CHANNEL_GROUP_PREFIX}foo`);
 			expect(event.detail).toStrictEqual('4{"foo":"bar"}');
 		});
 
 		test('broadcast', async () => {
-			const promise = server.wait(OutcomePayloadEventType.BROADCAST);
+			const promise = server.wait(OutcomePayloadEventType.CHANNEL);
 
 			server.broadcast({ foo: 'bar' });
 
 			const event = await promise;
+			expect(event.channel_id).toBe(CHANNEL_BROADCAST);
 			expect(event.detail).toStrictEqual('4{"foo":"bar"}');
 		});
 	});

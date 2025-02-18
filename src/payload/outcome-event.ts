@@ -1,13 +1,11 @@
 import { NeoEvent } from 'neoevents';
 
 export const EVENT_TYPE_SOCKET = 'p.socket';
-export const EVENT_TYPE_GROUP = 'p.group';
-export const EVENT_TYPE_BROADCAST = 'p.broadcast';
+export const EVENT_TYPE_CHANNEL = 'p.channel';
 
 export enum OutcomePayloadEventType {
 	SOCKET = EVENT_TYPE_SOCKET,
-	GROUP = EVENT_TYPE_GROUP,
-	BROADCAST = EVENT_TYPE_BROADCAST,
+	CHANNEL = EVENT_TYPE_CHANNEL,
 }
 
 export class OutcomePayloadSocketEvent extends NeoEvent<string> {
@@ -22,22 +20,13 @@ export class OutcomePayloadSocketEvent extends NeoEvent<string> {
 	}
 }
 
-export class OutcomePayloadGroupEvent extends NeoEvent<string> {
+export class OutcomePayloadChannelEvent extends NeoEvent<string> {
 	constructor(
-		public group_id: string,
+		public channel_id: string,
 		payload: string,
 	) {
 		super(
-			OutcomePayloadEventType.GROUP,
-			payload,
-		);
-	}
-}
-
-export class OutcomePayloadBroadcastEvent extends NeoEvent<string> {
-	constructor(payload: string) {
-		super(
-			OutcomePayloadEventType.BROADCAST,
+			OutcomePayloadEventType.CHANNEL,
 			payload,
 		);
 	}

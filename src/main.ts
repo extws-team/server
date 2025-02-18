@@ -1,7 +1,7 @@
 import { NeoEventTarget } from 'neoevents';
 import {
-	GROUP_PREFIX,
-	GROUP_BROADCAST,
+	CHANNEL_GROUP_PREFIX,
+	CHANNEL_BROADCAST,
 	IDLE_TIMEOUT,
 	IDLE_TIMEOUT_DISCONNECT_MS,
 	TIMEFRAME_PING_DISCONNECT_MS,
@@ -20,19 +20,16 @@ import {
 } from './payload/types.js';
 import {
 	EVENT_TYPE_SOCKET,
-	EVENT_TYPE_GROUP,
-	EVENT_TYPE_BROADCAST,
+	EVENT_TYPE_CHANNEL,
 	OutcomePayloadSocketEvent,
-	OutcomePayloadGroupEvent,
-	OutcomePayloadBroadcastEvent,
+	OutcomePayloadChannelEvent,
 } from './payload/outcome-event.js';
 
 type EventMap = {
 	connect: ExtWSEvent<undefined>,
 	disconnect: ExtWSEvent<undefined>,
 	[EVENT_TYPE_SOCKET]: OutcomePayloadSocketEvent,
-	[EVENT_TYPE_GROUP]: OutcomePayloadGroupEvent,
-	[EVENT_TYPE_BROADCAST]: OutcomePayloadBroadcastEvent,
+	[EVENT_TYPE_CHANNEL]: OutcomePayloadChannelEvent,
 } & {
 	[key: string]: ExtWSEvent,
 };
@@ -57,8 +54,8 @@ export class ExtWS extends NeoEventTarget<EventMap> {
 		);
 
 		// @ts-expect-error Property is protected
-		client.addToGroup(
-			GROUP_BROADCAST,
+		client.addToChannel(
+			CHANNEL_BROADCAST,
 		);
 		// @ts-expect-error Property is protected
 		client.sendPayload(
@@ -158,6 +155,7 @@ export class ExtWS extends NeoEventTarget<EventMap> {
 		arg1?: string | PayloadData,
 		arg2?: PayloadData,
 	) {
+		const channel_id = CHANNEL_GROUP_PREFIX + group_id;
 		const payload = buildPayload(
 			PayloadType.MESSAGE,
 			arg1,
@@ -165,14 +163,14 @@ export class ExtWS extends NeoEventTarget<EventMap> {
 		);
 
 		this.publish(
-			`${GROUP_PREFIX}${group_id}`,
+			channel_id,
 			payload,
 		);
 
 		if (this.has_adapter) {
 			this.dispatchEvent(
-				new OutcomePayloadGroupEvent(
-					group_id,
+				new OutcomePayloadChannelEvent(
+					channel_id,
 					payload,
 				),
 			);
@@ -194,13 +192,16 @@ export class ExtWS extends NeoEventTarget<EventMap> {
 		);
 
 		this.publish(
-			GROUP_BROADCAST,
+			CHANNEL_BROADCAST,
 			payload,
 		);
 
 		if (this.has_adapter) {
 			this.dispatchEvent(
-				new OutcomePayloadBroadcastEvent(payload),
+				new OutcomePayloadChannelEvent(
+					CHANNEL_BROADCAST,
+					payload,
+				),
 			);
 		}
 	}

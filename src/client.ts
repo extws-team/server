@@ -1,7 +1,7 @@
 import { IP } from '@kirick/ip';
 import { NeoEventTarget } from 'neoevents';
 import { customAlphabet } from 'nanoid';
-import { GROUP_PREFIX } from './consts.js';
+import { CHANNEL_GROUP_PREFIX } from './consts.js';
 import { ExtWSEvent } from './event.js';
 import { ExtWS } from './main.js';
 import { buildPayload } from './payload/json.js';
@@ -50,25 +50,25 @@ export class ExtWSClient extends NeoEventTarget {
 	}
 
 	join(group_id: string) {
-		this.addToGroup(
-			GROUP_PREFIX + group_id,
+		this.addToChannel(
+			CHANNEL_GROUP_PREFIX + group_id,
 		);
 	}
 
 	// eslint-disable-next-line class-methods-use-this
-	protected addToGroup(_group_id: string) {
-		throw new Error('Method "addToGroup(group_id)" must be defined by ExtWSClient extension.');
+	protected addToChannel(_channel_id: string) {
+		throw new Error('Method "addToChannel(channel_id)" must be defined by ExtWSClient extension.');
 	}
 
 	leave(group_id: string) {
-		this.removeFromGroup(
-			GROUP_PREFIX + group_id,
+		this.removeFromChannel(
+			CHANNEL_GROUP_PREFIX + group_id,
 		);
 	}
 
 	// eslint-disable-next-line class-methods-use-this
-	protected removeFromGroup(_group_id: string) {
-		throw new Error('Method "removeFromGroup(group_id)" must be defined by ExtWSClient extension.');
+	protected removeFromChannel(_channel_id: string) {
+		throw new Error('Method "removeFromChannel(channel_id)" must be defined by ExtWSClient extension.');
 	}
 
 	// eslint-disable-next-line class-methods-use-this
