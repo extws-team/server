@@ -208,12 +208,12 @@ export class ExtWS extends NeoEventTarget<EventMap> {
 
 	/**
 	 * Sends a message to a specific group of clients. THis method should be implemented by WebSocket server implementation.
-	 * @param _channel -
+	 * @param _channel_id -
 	 * @param _payload -
 	 */
 	// eslint-disable-next-line class-methods-use-this
 	protected publish(
-		_channel: string,
+		_channel_id: string,
 		_payload: string,
 	) {
 		throw new Error('Method not implemented.');
