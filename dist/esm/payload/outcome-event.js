@@ -1,12 +1,10 @@
 import { NeoEvent } from 'neoevents';
 export const EVENT_TYPE_SOCKET = 'p.socket';
-export const EVENT_TYPE_GROUP = 'p.group';
-export const EVENT_TYPE_BROADCAST = 'p.broadcast';
+export const EVENT_TYPE_CHANNEL = 'p.channel';
 export var OutcomePayloadEventType;
 (function (OutcomePayloadEventType) {
     OutcomePayloadEventType["SOCKET"] = "p.socket";
-    OutcomePayloadEventType["GROUP"] = "p.group";
-    OutcomePayloadEventType["BROADCAST"] = "p.broadcast";
+    OutcomePayloadEventType["CHANNEL"] = "p.channel";
 })(OutcomePayloadEventType || (OutcomePayloadEventType = {}));
 export class OutcomePayloadSocketEvent extends NeoEvent {
     socket_id;
@@ -15,15 +13,10 @@ export class OutcomePayloadSocketEvent extends NeoEvent {
         this.socket_id = socket_id;
     }
 }
-export class OutcomePayloadGroupEvent extends NeoEvent {
-    group_id;
-    constructor(group_id, payload) {
-        super(OutcomePayloadEventType.GROUP, payload);
-        this.group_id = group_id;
-    }
-}
-export class OutcomePayloadBroadcastEvent extends NeoEvent {
-    constructor(payload) {
-        super(OutcomePayloadEventType.BROADCAST, payload);
+export class OutcomePayloadChannelEvent extends NeoEvent {
+    channel_id;
+    constructor(channel_id, payload) {
+        super(OutcomePayloadEventType.CHANNEL, payload);
+        this.channel_id = channel_id;
     }
 }

@@ -1,15 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.OutcomePayloadBroadcastEvent = exports.OutcomePayloadGroupEvent = exports.OutcomePayloadSocketEvent = exports.OutcomePayloadEventType = exports.EVENT_TYPE_BROADCAST = exports.EVENT_TYPE_GROUP = exports.EVENT_TYPE_SOCKET = void 0;
+exports.OutcomePayloadChannelEvent = exports.OutcomePayloadSocketEvent = exports.OutcomePayloadEventType = exports.EVENT_TYPE_CHANNEL = exports.EVENT_TYPE_SOCKET = void 0;
 const neoevents_1 = require("neoevents");
 exports.EVENT_TYPE_SOCKET = 'p.socket';
-exports.EVENT_TYPE_GROUP = 'p.group';
-exports.EVENT_TYPE_BROADCAST = 'p.broadcast';
+exports.EVENT_TYPE_CHANNEL = 'p.channel';
 var OutcomePayloadEventType;
 (function (OutcomePayloadEventType) {
     OutcomePayloadEventType["SOCKET"] = "p.socket";
-    OutcomePayloadEventType["GROUP"] = "p.group";
-    OutcomePayloadEventType["BROADCAST"] = "p.broadcast";
+    OutcomePayloadEventType["CHANNEL"] = "p.channel";
 })(OutcomePayloadEventType || (exports.OutcomePayloadEventType = OutcomePayloadEventType = {}));
 class OutcomePayloadSocketEvent extends neoevents_1.NeoEvent {
     socket_id;
@@ -19,17 +17,11 @@ class OutcomePayloadSocketEvent extends neoevents_1.NeoEvent {
     }
 }
 exports.OutcomePayloadSocketEvent = OutcomePayloadSocketEvent;
-class OutcomePayloadGroupEvent extends neoevents_1.NeoEvent {
-    group_id;
-    constructor(group_id, payload) {
-        super(OutcomePayloadEventType.GROUP, payload);
-        this.group_id = group_id;
+class OutcomePayloadChannelEvent extends neoevents_1.NeoEvent {
+    channel_id;
+    constructor(channel_id, payload) {
+        super(OutcomePayloadEventType.CHANNEL, payload);
+        this.channel_id = channel_id;
     }
 }
-exports.OutcomePayloadGroupEvent = OutcomePayloadGroupEvent;
-class OutcomePayloadBroadcastEvent extends neoevents_1.NeoEvent {
-    constructor(payload) {
-        super(OutcomePayloadEventType.BROADCAST, payload);
-    }
-}
-exports.OutcomePayloadBroadcastEvent = OutcomePayloadBroadcastEvent;
+exports.OutcomePayloadChannelEvent = OutcomePayloadChannelEvent;

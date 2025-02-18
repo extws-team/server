@@ -20,7 +20,7 @@ class ExtWS extends neoevents_1.NeoEventTarget {
     onConnect(client) {
         this.clients.set(client.id, client);
         // @ts-expect-error Property is protected
-        client.addToGroup(consts_js_1.GROUP_BROADCAST);
+        client.addToChannel(consts_js_1.CHANNEL_BROADCAST);
         // @ts-expect-error Property is protected
         client.sendPayload((0, json_js_1.buildPayload)(types_js_1.PayloadType.INIT, {
             id: client.id,
@@ -61,17 +61,18 @@ class ExtWS extends neoevents_1.NeoEventTarget {
         }
     }
     sendToGroup(group_id, arg1, arg2) {
+        const channel_id = consts_js_1.CHANNEL_GROUP_PREFIX + group_id;
         const payload = (0, json_js_1.buildPayload)(types_js_1.PayloadType.MESSAGE, arg1, arg2);
-        this.publish(`${consts_js_1.GROUP_PREFIX}${group_id}`, payload);
+        this.publish(channel_id, payload);
         if (this.has_adapter) {
-            this.dispatchEvent(new outcome_event_js_1.OutcomePayloadGroupEvent(group_id, payload));
+            this.dispatchEvent(new outcome_event_js_1.OutcomePayloadChannelEvent(channel_id, payload));
         }
     }
     broadcast(arg0, arg1) {
         const payload = (0, json_js_1.buildPayload)(types_js_1.PayloadType.MESSAGE, arg0, arg1);
-        this.publish(consts_js_1.GROUP_BROADCAST, payload);
+        this.publish(consts_js_1.CHANNEL_BROADCAST, payload);
         if (this.has_adapter) {
-            this.dispatchEvent(new outcome_event_js_1.OutcomePayloadBroadcastEvent(payload));
+            this.dispatchEvent(new outcome_event_js_1.OutcomePayloadChannelEvent(consts_js_1.CHANNEL_BROADCAST, payload));
         }
     }
     /**

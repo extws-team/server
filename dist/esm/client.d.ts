@@ -19,9 +19,9 @@ export declare class ExtWSClient extends NeoEventTarget {
     stat: ExtWSClientStat;
     constructor(server: ExtWS, { url, headers, ip, }: ClientOptions);
     join(group_id: string): void;
-    protected addToGroup(_group_id: string): void;
+    protected addToChannel(_channel_id: string): void;
     leave(group_id: string): void;
-    protected removeFromGroup(_group_id: string): void;
+    protected removeFromChannel(_channel_id: string): void;
     protected sendPayload(_payload: string): void;
     send(): void;
     send(event_type: string): void;

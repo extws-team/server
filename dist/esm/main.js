@@ -1,10 +1,10 @@
 import { NeoEventTarget } from 'neoevents';
-import { GROUP_PREFIX, GROUP_BROADCAST, IDLE_TIMEOUT, IDLE_TIMEOUT_DISCONNECT_MS, TIMEFRAME_PING_DISCONNECT_MS, IDLE_TIMEOUT_PING_MS, } from './consts.js';
+import { CHANNEL_GROUP_PREFIX, CHANNEL_BROADCAST, IDLE_TIMEOUT, IDLE_TIMEOUT_DISCONNECT_MS, TIMEFRAME_PING_DISCONNECT_MS, IDLE_TIMEOUT_PING_MS, } from './consts.js';
 import { ExtWSClient } from './client.js';
 import { ExtWSEvent } from './event.js';
 import { buildPayload, parsePayload, } from './payload/json.js';
 import { PayloadType, } from './payload/types.js';
-import { EVENT_TYPE_SOCKET, EVENT_TYPE_GROUP, EVENT_TYPE_BROADCAST, OutcomePayloadSocketEvent, OutcomePayloadGroupEvent, OutcomePayloadBroadcastEvent, } from './payload/outcome-event.js';
+import { EVENT_TYPE_SOCKET, EVENT_TYPE_CHANNEL, OutcomePayloadSocketEvent, OutcomePayloadChannelEvent, } from './payload/outcome-event.js';
 export class ExtWS extends NeoEventTarget {
     options;
     clients = new Map();
@@ -17,7 +17,7 @@ export class ExtWS extends NeoEventTarget {
     onConnect(client) {
         this.clients.set(client.id, client);
         // @ts-expect-error Property is protected
-        client.addToGroup(GROUP_BROADCAST);
+        client.addToChannel(CHANNEL_BROADCAST);
         // @ts-expect-error Property is protected
         client.sendPayload(buildPayload(PayloadType.INIT, {
             id: client.id,
@@ -58,17 +58,18 @@ export class ExtWS extends NeoEventTarget {
         }
     }
     sendToGroup(group_id, arg1, arg2) {
+        const channel_id = CHANNEL_GROUP_PREFIX + group_id;
         const payload = buildPayload(PayloadType.MESSAGE, arg1, arg2);
-        this.publish(`${GROUP_PREFIX}${group_id}`, payload);
+        this.publish(channel_id, payload);
         if (this.has_adapter) {
-            this.dispatchEvent(new OutcomePayloadGroupEvent(group_id, payload));
+            this.dispatchEvent(new OutcomePayloadChannelEvent(channel_id, payload));
         }
     }
     broadcast(arg0, arg1) {
         const payload = buildPayload(PayloadType.MESSAGE, arg0, arg1);
-        this.publish(GROUP_BROADCAST, payload);
+        this.publish(CHANNEL_BROADCAST, payload);
         if (this.has_adapter) {
-            this.dispatchEvent(new OutcomePayloadBroadcastEvent(payload));
+            this.dispatchEvent(new OutcomePayloadChannelEvent(CHANNEL_BROADCAST, payload));
         }
     }
     /**

@@ -26,18 +26,18 @@ class ExtWSClient extends neoevents_1.NeoEventTarget {
         this.ip = ip;
     }
     join(group_id) {
-        this.addToGroup(consts_js_1.GROUP_PREFIX + group_id);
+        this.addToChannel(consts_js_1.CHANNEL_GROUP_PREFIX + group_id);
     }
     // eslint-disable-next-line class-methods-use-this
-    addToGroup(_group_id) {
-        throw new Error('Method "addToGroup(group_id)" must be defined by ExtWSClient extension.');
+    addToChannel(_channel_id) {
+        throw new Error('Method "addToChannel(channel_id)" must be defined by ExtWSClient extension.');
     }
     leave(group_id) {
-        this.removeFromGroup(consts_js_1.GROUP_PREFIX + group_id);
+        this.removeFromChannel(consts_js_1.CHANNEL_GROUP_PREFIX + group_id);
     }
     // eslint-disable-next-line class-methods-use-this
-    removeFromGroup(_group_id) {
-        throw new Error('Method "removeFromGroup(group_id)" must be defined by ExtWSClient extension.');
+    removeFromChannel(_channel_id) {
+        throw new Error('Method "removeFromChannel(channel_id)" must be defined by ExtWSClient extension.');
     }
     // eslint-disable-next-line class-methods-use-this
     sendPayload(_payload) {
