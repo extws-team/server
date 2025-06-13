@@ -1,23 +1,14 @@
 /* eslint-disable max-lines */
-import {
-	beforeEach,
-	describe,
-	expect,
-	test,
-	vi,
-} from 'vitest';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 import {
 	TIMEFRAME_PING_DISCONNECT_MS,
 	IDLE_TIMEOUT_PING_MS,
 	CHANNEL_BROADCAST,
 	CHANNEL_GROUP_PREFIX,
 } from '../src/consts.js';
-import {
-	ExtWSTest,
-	TestPublishEvent,
-} from '../test/server.js';
+import { ExtWSTest, TestPublishEvent } from '../test/server.js';
 import { OutcomePayloadEventType } from './payload/outcome-event.js';
-import { type ExtWSEvent } from './event.js';
+import type { ExtWSEvent } from './event.js';
 
 const server = new ExtWSTest({});
 
@@ -28,10 +19,7 @@ const server = new ExtWSTest({});
  */
 function shouldHang(promise: Promise<unknown>) {
 	return new Promise((resolve, reject) => {
-		setTimeout(
-			resolve,
-			100,
-		);
+		setTimeout(resolve, 100);
 
 		// eslint-disable-next-line promise/catch-or-return, promise/always-return
 		promise.then(() => {
@@ -71,7 +59,7 @@ describe('ExtWS', () => {
 		const promise = server.wait('test.sendPayload');
 		server.open();
 
-		const event = await promise as ExtWSEvent<string>;
+		const event = (await promise) as ExtWSEvent<string>;
 		const startsWith = event.detail.startsWith('1{"');
 		expect(startsWith).toBe(true);
 	});
@@ -91,9 +79,7 @@ describe('ExtWS', () => {
 		expect(event_ping.detail).toBe('2');
 
 		vi.advanceTimersByTime(TIMEFRAME_PING_DISCONNECT_MS);
-		expect(
-			await promise_disconnect,
-		).not.toBe(undefined);
+		expect(await promise_disconnect).not.toBe(undefined);
 
 		vi.useRealTimers();
 	});
@@ -108,7 +94,10 @@ describe('ExtWS', () => {
 		server.onMessage(client, `4${'a'.repeat(32)}{"foo":"boo"}`);
 
 		// invalid json
-		server.onMessage(client, '4{"token":"#$344++399949","playerId":1720,"queryPlayerId":1720,"gameId":5577355},"method":"throwDices"}');
+		server.onMessage(
+			client,
+			'4{"token":"#$344++399949","playerId":1720,"queryPlayerId":1720,"gameId":5577355},"method":"throwDices"}',
+		);
 	});
 });
 
@@ -130,7 +119,7 @@ describe('client', () => {
 			const promise = server.wait('test.removeFromChannel');
 			client?.leave('foo');
 
-			const event = await promise as ExtWSEvent<{ group: string }>;
+			const event = (await promise) as ExtWSEvent<{ group: string }>;
 			expect(event.detail).toStrictEqual({
 				channel: `${CHANNEL_GROUP_PREFIX}foo`,
 			});
@@ -204,10 +193,7 @@ describe('server -> client', () => {
 		test('(event_type, data)', async () => {
 			const promise = server.wait('test.sendPayload');
 
-			client.send(
-				'test',
-				{ foo: 'bar' },
-			);
+			client.send('test', { foo: 'bar' });
 
 			const event = await promise;
 			expect(event.detail).toStrictEqual('4test{"foo":"bar"}');
@@ -378,9 +364,7 @@ describe('adapter', () => {
 		});
 
 		test('sendToSocket', async () => {
-			const promise = shouldHang(
-				server.wait(OutcomePayloadEventType.SOCKET),
-			);
+			const promise = shouldHang(server.wait(OutcomePayloadEventType.SOCKET));
 
 			server.sendToSocket('777', { foo: 'bar' });
 
@@ -388,9 +372,7 @@ describe('adapter', () => {
 		});
 
 		test('sendToGroup', async () => {
-			const promise = shouldHang(
-				server.wait(OutcomePayloadEventType.CHANNEL),
-			);
+			const promise = shouldHang(server.wait(OutcomePayloadEventType.CHANNEL));
 
 			server.sendToGroup('channel', { foo: 'bar' });
 
@@ -398,9 +380,7 @@ describe('adapter', () => {
 		});
 
 		test('broadcast', async () => {
-			const promise = shouldHang(
-				server.wait(OutcomePayloadEventType.CHANNEL),
-			);
+			const promise = shouldHang(server.wait(OutcomePayloadEventType.CHANNEL));
 
 			server.broadcast({ foo: 'bar' });
 

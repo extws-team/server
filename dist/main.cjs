@@ -1,6 +1,5 @@
 const require_outcome_event = require('./outcome-event-DMrRECXk.cjs');
 const neoevents = require_outcome_event.__toESM(require("neoevents"));
-require("@kirick/ip");
 const nanoid = require_outcome_event.__toESM(require("nanoid"));
 
 //#region src/event.ts

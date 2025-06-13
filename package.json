@@ -28,6 +28,7 @@
 		"node": ">=20"
 	},
 	"dependencies": {
+		"@kirick/lint": "^0.1.2",
 		"nanoid": "3.3.8",
 		"neoevents": "^0.2.0"
 	},
@@ -35,9 +36,10 @@
 		"@kirick/ip": "^0.1.1"
 	},
 	"devDependencies": {
-		"@kirick/eslint-config": "0.1.30",
+		"@biomejs/biome": "1.9.4",
 		"@types/node": "^20",
-		"eslint": "9.10.0",
+		"eslint": "9.27.0",
+		"oxlint": "0.16.12",
 		"publint": "0.3.12",
 		"tsdown": "0.12.2",
 		"typescript": "5.8.3",
@@ -47,7 +49,7 @@
 	"scripts": {
 		"build": "tsdown src/main.ts src/dev.ts --clean --publint --unused --dts --format esm --format cjs",
 		"check": "bun run lint && bun run build && bun run test",
-		"lint": "eslint . && tsc",
+		"lint": "biome format && oxlint && eslint . && tsc",
 		"test": "vitest run --no-file-parallelism",
 		"# test:note": "# no bun test because it doesn't support fake timers for setTimeout/setInterval"
 	},
@@ -55,13 +57,7 @@
 		"type": "git",
 		"url": "git+https://github.com/extws-team/server.git"
 	},
-	"keywords": [
-		"websocket",
-		"ws",
-		"networking",
-		"json",
-		"rtc"
-	],
+	"keywords": ["websocket", "ws", "networking", "json", "rtc"],
 	"author": "Daniil Kirichenko (https://twitter.com/kirickme)",
 	"license": "MIT",
 	"bugs": {

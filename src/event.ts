@@ -1,5 +1,5 @@
 import { NeoEvent } from 'neoevents';
-import { ExtWSClient } from './main.js';
+import type { ExtWSClient } from './main.js';
 
 export class ExtWSEvent<D = unknown> extends NeoEvent<D> {
 	constructor(

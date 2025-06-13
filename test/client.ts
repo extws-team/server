@@ -4,24 +4,16 @@ import { ExtWSEvent } from '../src/event.js';
 export class ExtWSTestClient extends ExtWSClient {
 	private channels = new Map<string, Set<ExtWSClient>>();
 
-	protected sendPayload(payload: string) {
-		const event = new ExtWSEvent(
-			'test.sendPayload',
-			this,
-			payload,
-		);
+	protected override sendPayload(payload: string) {
+		const event = new ExtWSEvent('test.sendPayload', this, payload);
 
 		this.server.dispatchEvent(event);
 	}
 
-	protected addToChannel(channel_id: string) {
-		const event = new ExtWSEvent(
-			'test.addToChannel',
-			this,
-			{
-				channel: channel_id,
-			},
-		);
+	protected override addToChannel(channel_id: string) {
+		const event = new ExtWSEvent('test.addToChannel', this, {
+			channel: channel_id,
+		});
 
 		if (!this.channels.has(channel_id)) {
 			this.channels.set(channel_id, new Set());
@@ -35,14 +27,10 @@ export class ExtWSTestClient extends ExtWSClient {
 		}
 	}
 
-	protected removeFromChannel(channel_id: string) {
-		const event = new ExtWSEvent(
-			'test.removeFromChannel',
-			this,
-			{
-				channel: channel_id,
-			},
-		);
+	protected override removeFromChannel(channel_id: string) {
+		const event = new ExtWSEvent('test.removeFromChannel', this, {
+			channel: channel_id,
+		});
 
 		this.channels.delete(channel_id);
 		this.server.dispatchEvent(event);

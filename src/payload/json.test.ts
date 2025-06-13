@@ -1,8 +1,4 @@
-import {
-	describe,
-	expect,
-	test,
-} from 'vitest';
+import { describe, expect, test } from 'vitest';
 import { parsePayload } from '../payload/json.js';
 import { PayloadType } from '../payload/types.js';
 

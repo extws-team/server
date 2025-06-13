@@ -1,11 +1,7 @@
-import {
-	type Payload,
-	type PayloadData,
-	PayloadType,
-} from './types.js';
+import { type Payload, type PayloadData, PayloadType } from './types.js';
 
-const PRINT_ERRORS = process.env.NODE_ENV === 'development'
-	|| process.env.NODE_ENV === 'test';
+const PRINT_ERRORS =
+	process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test';
 
 /**
  * Builds a payload.
@@ -23,14 +19,10 @@ export function buildPayload(
 	let event_type: string | undefined;
 	let data: PayloadData | undefined;
 
-	if (
-		undefined === argument2
-		&& typeof argument1 !== 'string'
-	) {
+	if (undefined === argument2 && typeof argument1 !== 'string') {
 		data = argument1;
 		event_type = undefined;
-	}
-	else if (typeof argument1 === 'string') {
+	} else if (typeof argument1 === 'string') {
 		data = argument2;
 		event_type = argument1;
 	}
@@ -46,7 +38,7 @@ export function buildPayload(
 	return payload;
 }
 
-const JSON_START = new Set([ '[', '{' ]);
+const JSON_START = new Set(['[', '{']);
 const textDecoder = new TextDecoder();
 
 type TypedArray =
@@ -67,16 +59,18 @@ type TypedArray =
  * @returns - Whether the value is a typed array.
  */
 function isTypedArray(value: unknown): value is TypedArray {
-	return value instanceof Int8Array
-		|| value instanceof Int16Array
-		|| value instanceof Int32Array
-		|| value instanceof Uint8Array
-		|| value instanceof Uint8ClampedArray
-		|| value instanceof Uint16Array
-		|| value instanceof Uint32Array
-		|| value instanceof Float32Array
-		|| value instanceof Float64Array
-		|| value instanceof BigInt64Array;
+	return (
+		value instanceof Int8Array ||
+		value instanceof Int16Array ||
+		value instanceof Int32Array ||
+		value instanceof Uint8Array ||
+		value instanceof Uint8ClampedArray ||
+		value instanceof Uint16Array ||
+		value instanceof Uint32Array ||
+		value instanceof Float32Array ||
+		value instanceof Float64Array ||
+		value instanceof BigInt64Array
+	);
 }
 
 /**
@@ -85,26 +79,20 @@ function isTypedArray(value: unknown): value is TypedArray {
  * @returns The parsed payload.
  */
 export function parsePayload(
-	payload: string
-		| ArrayBuffer
-		| TypedArray
-		| Buffer[],
+	payload: string | ArrayBuffer | TypedArray | Buffer[],
 ): Payload {
 	if (typeof payload === 'string') {
 		// do nothing
-	}
-	else if (payload instanceof ArrayBuffer || isTypedArray(payload)) {
+	} else if (payload instanceof ArrayBuffer || isTypedArray(payload)) {
 		payload = textDecoder.decode(payload);
-	}
-	else if (Array.isArray(payload)) {
+	} else if (Array.isArray(payload)) {
 		payload = Buffer.concat(payload).toString();
-	}
-	else {
+	} else {
 		throw new TypeError('Invalid payload type.');
 	}
 
 	const result: Payload = {
-		payload_type: (payload.codePointAt(0) ?? 48) - 48 as PayloadType,
+		payload_type: ((payload.codePointAt(0) ?? 48) - 48) as PayloadType,
 	};
 
 	let start = 1;
@@ -120,8 +108,10 @@ export function parsePayload(
 
 	if (event_type.length > 31) {
 		if (PRINT_ERRORS) {
-			// eslint-disable-next-line no-console
-			console.error(`Event type cannot be longer than 31 characters, received "${event_type}"`);
+			// oxlint-disable-next-line no-console
+			console.error(
+				`Event type cannot be longer than 31 characters, received "${event_type}"`,
+			);
 		}
 
 		return {
@@ -137,10 +127,9 @@ export function parsePayload(
 		const payload_raw = payload.slice(start);
 		try {
 			result.data = JSON.parse(payload_raw);
-		}
-		catch {
+		} catch {
 			if (PRINT_ERRORS) {
-				// eslint-disable-next-line no-console
+				// oxlint-disable-next-line no-console
 				console.error(`Cannot parse payload "${payload_raw}": invalid JSON`);
 			}
 

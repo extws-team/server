@@ -18,15 +18,13 @@ export enum PayloadType {
 }
 
 export type ExtWSHttpResponse = {
-	status: number,
-	headers?: Record<string, string | undefined>,
-	body?: string,
+	status: number;
+	headers?: Record<string, string | undefined>;
+	body?: string;
 };
 
-export type ExtWSOnBeforeUpgradeHandler = (
-	options: {
-		url: ExtWSClient['url'],
-		headers: ExtWSClient['headers'],
-		ip: ExtWSClient['ip'],
-	},
-) => Promisable<ExtWSHttpResponse | undefined>;
+export type ExtWSOnBeforeUpgradeHandler = (options: {
+	url: ExtWSClient['url'];
+	headers: ExtWSClient['headers'];
+	ip: ExtWSClient['ip'];
+}) => Promisable<ExtWSHttpResponse | undefined>;

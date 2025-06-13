@@ -1,6 +1,5 @@
 import { CHANNEL_BROADCAST, CHANNEL_GROUP_PREFIX, IDLE_TIMEOUT, IDLE_TIMEOUT_DISCONNECT_MS, IDLE_TIMEOUT_PING_MS, OutcomePayloadChannelEvent$1 as OutcomePayloadChannelEvent, OutcomePayloadSocketEvent$1 as OutcomePayloadSocketEvent, PayloadType$1 as PayloadType, TIMEFRAME_PING_DISCONNECT_MS, buildPayload, parsePayload } from "./outcome-event-C10k8UJf.js";
 import { NeoEvent, NeoEventTarget } from "neoevents";
-import { IP } from "@kirick/ip";
 import { customAlphabet } from "nanoid";
 
 //#region src/event.ts
