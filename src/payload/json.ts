@@ -1,7 +1,7 @@
 import {
-	PayloadData,
-	PayloadType,
 	type Payload,
+	type PayloadData,
+	PayloadType,
 } from './types.js';
 
 const PRINT_ERRORS = process.env.NODE_ENV === 'development'
@@ -111,7 +111,7 @@ export function parsePayload(
 	let event_type = '';
 	for (
 		let index = start;
-		index < payload.length && JSON_START.has(payload[index]) === false;
+		index < payload.length && JSON_START.has(payload[index]!) === false;
 		index++
 	) {
 		event_type += payload[index];

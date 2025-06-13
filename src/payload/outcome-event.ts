@@ -1,11 +1,8 @@
 import { NeoEvent } from 'neoevents';
 
-export const EVENT_TYPE_SOCKET = 'p.socket';
-export const EVENT_TYPE_CHANNEL = 'p.channel';
-
 export enum OutcomePayloadEventType {
-	SOCKET = EVENT_TYPE_SOCKET,
-	CHANNEL = EVENT_TYPE_CHANNEL,
+	SOCKET = 'p.socket',
+	CHANNEL = 'p.channel',
 }
 
 export class OutcomePayloadSocketEvent extends NeoEvent<string> {

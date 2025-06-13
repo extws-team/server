@@ -19,8 +19,7 @@ import {
 	type ExtWSOnBeforeUpgradeHandler,
 } from './payload/types.js';
 import {
-	EVENT_TYPE_SOCKET,
-	EVENT_TYPE_CHANNEL,
+	OutcomePayloadEventType,
 	OutcomePayloadSocketEvent,
 	OutcomePayloadChannelEvent,
 } from './payload/outcome-event.js';
@@ -28,8 +27,8 @@ import {
 type EventMap = {
 	connect: ExtWSEvent<undefined>,
 	disconnect: ExtWSEvent<undefined>,
-	[EVENT_TYPE_SOCKET]: OutcomePayloadSocketEvent,
-	[EVENT_TYPE_CHANNEL]: OutcomePayloadChannelEvent,
+	[OutcomePayloadEventType.SOCKET]: OutcomePayloadSocketEvent,
+	[OutcomePayloadEventType.CHANNEL]: OutcomePayloadChannelEvent,
 } & {
 	[key: string]: ExtWSEvent,
 };
@@ -47,7 +46,7 @@ export class ExtWS extends NeoEventTarget<EventMap> {
 		this.deferClientsWatch();
 	}
 
-	protected onConnect(client: ExtWSClient) {
+	protected onConnect(client: ExtWSClient): void {
 		this.clients.set(
 			client.id,
 			client,
@@ -81,7 +80,7 @@ export class ExtWS extends NeoEventTarget<EventMap> {
 	protected onMessage(
 		client: ExtWSClient,
 		payload: string | Buffer,
-	) {
+	): void {
 		if (Buffer.isBuffer(payload)) {
 			payload = payload.toString('utf8');
 		}
@@ -215,7 +214,7 @@ export class ExtWS extends NeoEventTarget<EventMap> {
 	protected publish(
 		_channel_id: string,
 		_payload: string,
-	) {
+	): void {
 		throw new Error('Method not implemented.');
 	}
 

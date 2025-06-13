@@ -1,27 +1,31 @@
 {
 	"name": "@extws/server",
-	"version": "0.2.1-dev",
+	"version": "0.2.2-dev",
 	"description": "Base for simple ans powerful WebSocket server",
 	"publishConfig": {
 		"access": "public"
 	},
 	"type": "module",
-	"main": "dist/esm/main.js",
-	"types": "dist/esm/main.d.ts",
 	"exports": {
 		".": {
-			"import": "./dist/esm/main.js",
-			"require": "./dist/cjs/main.js",
-			"types": "./dist/esm/main.d.ts"
+			"types": {
+				"import": "./dist/main.d.ts",
+				"require": "./dist/main.d.cts"
+			},
+			"import": "./dist/main.js",
+			"require": "./dist/main.cjs"
 		},
 		"./dev": {
-			"import": "./dist/esm/dev.js",
-			"require": "./dist/cjs/dev.js",
-			"types": "./dist/esm/dev.d.ts"
+			"types": {
+				"import": "./dist/dev.d.ts",
+				"require": "./dist/dev.d.cts"
+			},
+			"import": "./dist/dev.js",
+			"require": "./dist/dev.cjs"
 		}
 	},
 	"engines": {
-		"node": ">=16.0.0"
+		"node": ">=20"
 	},
 	"dependencies": {
 		"nanoid": "3.3.8",
@@ -32,18 +36,18 @@
 	},
 	"devDependencies": {
 		"@kirick/eslint-config": "0.1.30",
-		"@types/node": "^22.7.4",
+		"@types/node": "^20",
 		"eslint": "9.10.0",
-		"typescript": "5.7.3",
-		"vitest": "2.1.2"
+		"publint": "0.3.12",
+		"tsdown": "0.12.2",
+		"typescript": "5.8.3",
+		"unplugin-unused": "0.5.0",
+		"vitest": "3.1.4"
 	},
 	"scripts": {
-		"build": "rm -r dist ; bun run build:esm && bun run build:cjs",
-		"build:cjs": "rm -r dist/cjs ; tsc --project tsconfig.cjs.json && echo '{\"type\":\"commonjs\"}' > dist/cjs/package.json",
-		"# build:cjs": "rm -r dist/cjs ; tsc --project tsconfig.cjs.json && (for file in $(find dist/cjs -type f -name '*.js') ; do sed -i '' 's/require(\"\\(.*\\)\\.js\"/require(\"\\1.cjs\"/g' $file && mv $file ${file%.js}.cjs ; done)",
-		"build:esm": "rm -r dist/esm ; tsc",
+		"build": "tsdown src/main.ts src/dev.ts --clean --publint --unused --dts --format esm --format cjs",
 		"check": "bun run lint && bun run build && bun run test",
-		"lint": "eslint . && tsc --skipLibCheck --noemit",
+		"lint": "eslint . && tsc",
 		"test": "vitest run --no-file-parallelism",
 		"# test:note": "# no bun test because it doesn't support fake timers for setTimeout/setInterval"
 	},

@@ -49,30 +49,30 @@ export class ExtWSClient extends NeoEventTarget {
 		this.ip = ip;
 	}
 
-	join(group_id: string) {
+	join(group_id: string): void {
 		this.addToChannel(
 			CHANNEL_GROUP_PREFIX + group_id,
 		);
 	}
 
 	// eslint-disable-next-line class-methods-use-this
-	protected addToChannel(_channel_id: string) {
+	protected addToChannel(_channel_id: string): void {
 		throw new Error('Method "addToChannel(channel_id)" must be defined by ExtWSClient extension.');
 	}
 
-	leave(group_id: string) {
+	leave(group_id: string): void {
 		this.removeFromChannel(
 			CHANNEL_GROUP_PREFIX + group_id,
 		);
 	}
 
 	// eslint-disable-next-line class-methods-use-this
-	protected removeFromChannel(_channel_id: string) {
+	protected removeFromChannel(_channel_id: string): void {
 		throw new Error('Method "removeFromChannel(channel_id)" must be defined by ExtWSClient extension.');
 	}
 
 	// eslint-disable-next-line class-methods-use-this
-	protected sendPayload(_payload: string) {
+	protected sendPayload(_payload: string): void {
 		throw new Error('Method "sendPayload(payload)" must be defined by ExtWSClient extension.');
 	}
 
@@ -94,7 +94,7 @@ export class ExtWSClient extends NeoEventTarget {
 		);
 	}
 
-	ping() {
+	ping(): void {
 		this.sendPayload(
 			buildPayload(
 				PayloadType.PING,
@@ -108,7 +108,7 @@ export class ExtWSClient extends NeoEventTarget {
 	 * Disconnects client.
 	 * @param _is_disconnected - If true, client is already disconnected from the Websocket server.
 	 */
-	disconnect(_is_disconnected: boolean = false) {
+	disconnect(_is_disconnected: boolean = false): void {
 		if (this.is_disconnected === false) {
 			const event = new ExtWSEvent(
 				'disconnect',
