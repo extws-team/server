@@ -7,14 +7,14 @@ interface ExtWSClientStat {
 }
 interface ClientOptions {
   url: URL;
-  headers: Map<string, string>;
+  headers: Headers;
   ip: IP;
 }
 declare class ExtWSClient extends NeoEventTarget {
   id: string;
   server: ExtWS;
   url: URL;
-  headers: Map<string, string>;
+  headers: Headers;
   ip: IP;
   stat: ExtWSClientStat;
   constructor(server: ExtWS, {

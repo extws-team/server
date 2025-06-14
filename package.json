@@ -49,7 +49,7 @@
 	"scripts": {
 		"build": "tsdown src/main.ts src/dev.ts --clean --publint --unused --dts --format esm --format cjs",
 		"check": "bun run lint && bun run build && bun run test",
-		"lint": "biome format && oxlint && eslint . && tsc",
+		"lint": "biome format && oxlint && eslint . && tsc && (cd test && tsc)",
 		"test": "vitest run --no-file-parallelism",
 		"# test:note": "# no bun test because it doesn't support fake timers for setTimeout/setInterval"
 	},

@@ -18,7 +18,7 @@ export class ExtWSTest extends ExtWS {
 	open() {
 		const client = new ExtWSTestClient(this, {
 			url: new URL('http://ws'),
-			headers: new Map(),
+			headers: new Headers(),
 			ip: new IP('::1'),
 		});
 

@@ -1,11 +1,11 @@
 import type { IP } from '@kirick/ip';
-import { NeoEventTarget } from 'neoevents';
 import { customAlphabet } from 'nanoid';
+import { NeoEventTarget } from 'neoevents';
 import { CHANNEL_GROUP_PREFIX } from './consts.js';
 import { ExtWSEvent } from './event.js';
 import type { ExtWS } from './main.js';
 import { buildPayload } from './payload/json.js';
-import { PayloadType, type PayloadData } from './payload/types.js';
+import { type PayloadData, PayloadType } from './payload/types.js';
 
 const nanoid = customAlphabet(
 	'0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
@@ -18,7 +18,7 @@ interface ExtWSClientStat {
 
 export interface ClientOptions {
 	url: URL;
-	headers: Map<string, string>; // Headers;
+	headers: Headers;
 	ip: IP;
 }
 
@@ -26,7 +26,7 @@ export class ExtWSClient extends NeoEventTarget {
 	id: string;
 	server: ExtWS;
 	url: URL;
-	headers: Map<string, string>; // Headers;
+	headers: Headers;
 	ip: IP;
 	stat: ExtWSClientStat = {
 		ts_last_active: Date.now(),
