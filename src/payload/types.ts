@@ -17,14 +17,8 @@ export enum PayloadType {
 	MESSAGE = 4,
 }
 
-export type ExtWSHttpResponse = {
-	status: number;
-	headers?: Record<string, string | undefined>;
-	body?: string;
-};
-
 export type ExtWSOnBeforeUpgradeHandler = (options: {
 	url: ExtWSClient['url'];
 	headers: ExtWSClient['headers'];
 	ip: ExtWSClient['ip'];
-}) => Promisable<ExtWSHttpResponse | undefined>;
+}) => Promisable<Response | undefined>;

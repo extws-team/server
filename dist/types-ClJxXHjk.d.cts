@@ -75,7 +75,6 @@ type EventMap = {
 };
 declare class ExtWS extends NeoEventTarget<EventMap> {
   protected options: {
-    // TODO: replace with Response
     onBeforeUpgrade?: ExtWSOnBeforeUpgradeHandler;
   };
   clients: Map<string, ExtWSClient>;
@@ -126,15 +125,10 @@ declare enum PayloadType {
   PONG = 3,
   MESSAGE = 4,
 }
-type ExtWSHttpResponse = {
-  status: number;
-  headers?: Record<string, string | undefined>;
-  body?: string;
-};
 type ExtWSOnBeforeUpgradeHandler = (options: {
   url: ExtWSClient["url"];
   headers: ExtWSClient["headers"];
   ip: ExtWSClient["ip"];
-}) => Promisable<ExtWSHttpResponse | undefined>;
+}) => Promisable<Response | undefined>;
 //#endregion
-export { ExtWS, ExtWSClient, ExtWSEvent, ExtWSHttpResponse, ExtWSOnBeforeUpgradeHandler, OutcomePayloadChannelEvent, OutcomePayloadEventType, OutcomePayloadSocketEvent, Payload, PayloadData, PayloadType, Promisable };
+export { ExtWS, ExtWSClient, ExtWSEvent, ExtWSOnBeforeUpgradeHandler, OutcomePayloadChannelEvent, OutcomePayloadEventType, OutcomePayloadSocketEvent, Payload, PayloadData, PayloadType, Promisable };

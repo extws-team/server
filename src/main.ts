@@ -36,7 +36,6 @@ export class ExtWS extends NeoEventTarget<EventMap> {
 
 	constructor(
 		protected options: {
-			// TODO: replace with Response
 			onBeforeUpgrade?: ExtWSOnBeforeUpgradeHandler;
 		},
 	) {

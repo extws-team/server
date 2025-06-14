@@ -1,4 +1,4 @@
-import { ExtWSHttpResponse, ExtWSOnBeforeUpgradeHandler, OutcomePayloadChannelEvent, OutcomePayloadEventType, OutcomePayloadSocketEvent, Payload, PayloadData, PayloadType, Promisable } from "./types-yyE6Ew2i.js";
+import { ExtWSOnBeforeUpgradeHandler, OutcomePayloadChannelEvent, OutcomePayloadEventType, OutcomePayloadSocketEvent, Payload, PayloadData, PayloadType, Promisable } from "./types-CMQgTOuo.js";
 
 //#region src/consts.d.ts
 
@@ -22,4 +22,4 @@ type TypedArray = Int8Array | Int16Array | Int32Array | Uint8Array | Uint8Clampe
 */
 declare function parsePayload(payload: string | ArrayBuffer | TypedArray | Buffer[]): Payload;
 //#endregion
-export { CHANNEL_BROADCAST, CHANNEL_GROUP_PREFIX, ExtWSHttpResponse, ExtWSOnBeforeUpgradeHandler, OutcomePayloadChannelEvent, OutcomePayloadEventType, OutcomePayloadSocketEvent, PayloadData, PayloadType, Promisable, buildPayload, parsePayload };
+export { CHANNEL_BROADCAST, CHANNEL_GROUP_PREFIX, ExtWSOnBeforeUpgradeHandler, OutcomePayloadChannelEvent, OutcomePayloadEventType, OutcomePayloadSocketEvent, PayloadData, PayloadType, Promisable, buildPayload, parsePayload };

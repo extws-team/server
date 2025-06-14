@@ -1,6 +1,6 @@
 {
 	"name": "@extws/server",
-	"version": "0.2.2-dev",
+	"version": "0.3.0-dev",
 	"description": "Base for simple ans powerful WebSocket server",
 	"publishConfig": {
 		"access": "public"
@@ -28,7 +28,6 @@
 		"node": ">=20"
 	},
 	"dependencies": {
-		"@kirick/lint": "^0.1.2",
 		"nanoid": "3.3.8",
 		"neoevents": "^0.2.0"
 	},
@@ -37,6 +36,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",
+		"@kirick/lint": "^0.1.2",
 		"@types/node": "^20",
 		"eslint": "9.27.0",
 		"oxlint": "0.16.12",
