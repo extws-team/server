@@ -5,7 +5,7 @@
       "name": "@extws/server",
       "dependencies": {
         "nanoid": "3.3.8",
-        "neoevents": "github:kirick-ts/neoevents#b30e13bb365e1d81ab5e8c54ac16edb039755d4c",
+        "neoevents": "0.3.0",
       },
       "devDependencies": {
         "@biomejs/biome": "2.1.1",
@@ -517,7 +517,7 @@
 
     "natural-compare": ["natural-compare@1.4.0", "", {}, "sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw=="],
 
-    "neoevents": ["neoevents@github:kirick-ts/neoevents#b30e13b", {}, "kirick-ts-neoevents-b30e13b"],
+    "neoevents": ["neoevents@0.3.0", "", {}, "sha512-et9vcJ8ElRUbgxeJXAw++1noXVY302fxRvwEoIDll9KiQAeySjTQBdLtATvtE17MgbitLjjixI5UcFOS92EI+w=="],
 
     "node-releases": ["node-releases@2.0.19", "", {}, "sha512-xxOWJsBKtzAq7DY0J+DTzuz58K8e7sJbdgwkbMWQe8UYB6ekmsQ45q0M/tJDsGaZmbC+l7n57UV8Hl5tHxO9uw=="],
 

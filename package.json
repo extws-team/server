@@ -29,7 +29,7 @@
 	},
 	"dependencies": {
 		"nanoid": "3.3.8",
-		"neoevents": "github:kirick-ts/neoevents#b30e13bb365e1d81ab5e8c54ac16edb039755d4c"
+		"neoevents": "0.3.0"
 	},
 	"peerDependencies": {
 		"@kirick/ip": "^0.1.1"
