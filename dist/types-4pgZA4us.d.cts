@@ -74,14 +74,9 @@ type EventMap = {
   [key: string]: ExtWSEvent;
 };
 declare class ExtWS extends NeoEventTarget<EventMap> {
-  protected options: {
-    onBeforeUpgrade?: ExtWSOnBeforeUpgradeHandler;
-  };
   clients: Map<string, ExtWSClient>;
   has_adapter: boolean;
-  constructor(options: {
-    onBeforeUpgrade?: ExtWSOnBeforeUpgradeHandler;
-  });
+  constructor();
   protected onConnect(client: ExtWSClient): void;
   protected onMessage(client: ExtWSClient, payload: string | Buffer): void;
   sendToSocket(socket_id: string): void;

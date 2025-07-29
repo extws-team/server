@@ -15,11 +15,7 @@ import {
 	OutcomePayloadEventType,
 	OutcomePayloadSocketEvent,
 } from './payload/outcome-event.js';
-import {
-	type ExtWSOnBeforeUpgradeHandler,
-	type PayloadData,
-	PayloadType,
-} from './payload/types.js';
+import { type PayloadData, PayloadType } from './payload/types.js';
 
 type EventMap = {
 	connect: ExtWSEvent<undefined>;
@@ -34,11 +30,7 @@ export class ExtWS extends NeoEventTarget<EventMap> {
 	clients: Map<string, ExtWSClient> = new Map();
 	has_adapter = false;
 
-	constructor(
-		protected options: {
-			onBeforeUpgrade?: ExtWSOnBeforeUpgradeHandler;
-		},
-	) {
+	constructor() {
 		super();
 
 		this.deferClientsWatch();

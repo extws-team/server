@@ -1,4 +1,4 @@
-import { ExtWSOnBeforeUpgradeHandler, OutcomePayloadChannelEvent, OutcomePayloadEventType, OutcomePayloadSocketEvent, Payload, PayloadData, PayloadType, Promisable } from "./types-B1LoXnI-.js";
+import { ExtWSOnBeforeUpgradeHandler, OutcomePayloadChannelEvent, OutcomePayloadEventType, OutcomePayloadSocketEvent, Payload, PayloadData, PayloadType, Promisable } from "./types-Ds8y6R-K.js";
 
 //#region src/consts.d.ts
 

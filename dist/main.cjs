@@ -71,9 +71,8 @@ var ExtWSClient = class extends neoevents.NeoEventTarget {
 var ExtWS = class extends neoevents.NeoEventTarget {
 	clients = new Map();
 	has_adapter = false;
-	constructor(options) {
+	constructor() {
 		super();
-		this.options = options;
 		this.deferClientsWatch();
 	}
 	onConnect(client) {

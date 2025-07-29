@@ -1,2 +1,2 @@
-import { ExtWS, ExtWSClient, ExtWSEvent } from "./types-6wy8iEeT.cjs";
+import { ExtWS, ExtWSClient, ExtWSEvent } from "./types-4pgZA4us.cjs";
 export { ExtWS, ExtWSClient, ExtWSEvent };

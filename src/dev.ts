@@ -9,14 +9,14 @@ export {
 } from './payload/json.js';
 
 export {
+	OutcomePayloadChannelEvent,
 	OutcomePayloadEventType,
 	OutcomePayloadSocketEvent,
-	OutcomePayloadChannelEvent,
 } from './payload/outcome-event.js';
 
 export {
-	PayloadType,
-	type PayloadData,
-	type Promisable,
 	type ExtWSOnBeforeUpgradeHandler,
+	type PayloadData,
+	PayloadType,
+	type Promisable,
 } from './payload/types.js';
