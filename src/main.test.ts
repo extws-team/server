@@ -1,16 +1,15 @@
-/* eslint-disable max-lines */
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import {
-	TIMEFRAME_PING_DISCONNECT_MS,
-	IDLE_TIMEOUT_PING_MS,
 	CHANNEL_BROADCAST,
 	CHANNEL_GROUP_PREFIX,
+	IDLE_TIMEOUT_PING_MS,
+	TIMEFRAME_PING_DISCONNECT_MS,
 } from '../src/consts.js';
 import { ExtWSTest, TestPublishEvent } from '../test/server.js';
-import { OutcomePayloadEventType } from './payload/outcome-event.js';
 import type { ExtWSEvent } from './event.js';
+import { OutcomePayloadEventType } from './payload/outcome-event.js';
 
-const server = new ExtWSTest({});
+const server = new ExtWSTest();
 
 /**
  * Resolves if the given promise hangs.
@@ -67,7 +66,7 @@ describe('ExtWS', () => {
 	test('ping & disconnect if client is silent', async () => {
 		vi.useFakeTimers();
 
-		const server_local = new ExtWSTest({});
+		const server_local = new ExtWSTest();
 		server_local.open();
 
 		const promise_ping = server_local.wait('test.sendPayload');
@@ -159,6 +158,7 @@ describe('client -> server', () => {
 	});
 });
 
+// oxlint-disable-next-line max-lines-per-function
 describe('server -> client', () => {
 	describe('client.send', () => {
 		const client = server.open();

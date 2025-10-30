@@ -46,7 +46,7 @@ export class ExtWSClient extends NeoEventTarget {
 		this.addToChannel(CHANNEL_GROUP_PREFIX + group_id);
 	}
 
-	// eslint-disable-next-line class-methods-use-this
+	// oxlint-disable-next-line class-methods-use-this
 	protected addToChannel(_channel_id: string): void {
 		throw new Error(
 			'Method "addToChannel(channel_id)" must be defined by ExtWSClient extension.',
@@ -57,14 +57,14 @@ export class ExtWSClient extends NeoEventTarget {
 		this.removeFromChannel(CHANNEL_GROUP_PREFIX + group_id);
 	}
 
-	// eslint-disable-next-line class-methods-use-this
+	// oxlint-disable-next-line class-methods-use-this
 	protected removeFromChannel(_channel_id: string): void {
 		throw new Error(
 			'Method "removeFromChannel(channel_id)" must be defined by ExtWSClient extension.',
 		);
 	}
 
-	// eslint-disable-next-line class-methods-use-this
+	// oxlint-disable-next-line class-methods-use-this
 	protected sendPayload(_payload: string): void {
 		throw new Error(
 			'Method "sendPayload(payload)" must be defined by ExtWSClient extension.',

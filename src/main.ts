@@ -145,7 +145,7 @@ export class ExtWS extends NeoEventTarget<EventMap> {
 	 * @param _channel_id -
 	 * @param _payload -
 	 */
-	// eslint-disable-next-line class-methods-use-this
+	// oxlint-disable-next-line class-methods-use-this
 	protected publish(_channel_id: string, _payload: string): void {
 		throw new Error('Method not implemented.');
 	}
@@ -186,7 +186,7 @@ export class ExtWS extends NeoEventTarget<EventMap> {
 		this.deferClientsWatch();
 	}
 
-	// eslint-disable-next-line class-methods-use-this
+	// oxlint-disable-next-line class-methods-use-this
 	close(): Promise<void> {
 		throw new Error('Method not implemented.');
 	}

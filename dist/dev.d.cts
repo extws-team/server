@@ -1,4 +1,4 @@
-import { ExtWSOnBeforeUpgradeHandler, OutcomePayloadChannelEvent, OutcomePayloadEventType, OutcomePayloadSocketEvent, Payload, PayloadData, PayloadType, Promisable } from "./types-4pgZA4us.cjs";
+import { a as Promisable, c as OutcomePayloadEventType, i as PayloadType, l as OutcomePayloadSocketEvent, n as Payload, r as PayloadData, s as OutcomePayloadChannelEvent, t as ExtWSOnBeforeUpgradeHandler } from "./types-htgcWSrl.cjs";
 
 //#region src/consts.d.ts
 
@@ -22,4 +22,4 @@ type TypedArray = Int8Array | Int16Array | Int32Array | Uint8Array | Uint8Clampe
 */
 declare function parsePayload(payload: string | ArrayBuffer | TypedArray | Buffer[]): Payload;
 //#endregion
-export { CHANNEL_BROADCAST, CHANNEL_GROUP_PREFIX, ExtWSOnBeforeUpgradeHandler, OutcomePayloadChannelEvent, OutcomePayloadEventType, OutcomePayloadSocketEvent, PayloadData, PayloadType, Promisable, buildPayload, parsePayload };
+export { CHANNEL_BROADCAST, CHANNEL_GROUP_PREFIX, type ExtWSOnBeforeUpgradeHandler, OutcomePayloadChannelEvent, OutcomePayloadEventType, OutcomePayloadSocketEvent, type PayloadData, PayloadType, type Promisable, buildPayload, parsePayload };

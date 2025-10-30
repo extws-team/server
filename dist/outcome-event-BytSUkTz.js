@@ -1,27 +1,4 @@
-//#region rolldown:runtime
-var __create = Object.create;
-var __defProp = Object.defineProperty;
-var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
-var __getOwnPropNames = Object.getOwnPropertyNames;
-var __getProtoOf = Object.getPrototypeOf;
-var __hasOwnProp = Object.prototype.hasOwnProperty;
-var __copyProps = (to, from, except, desc) => {
-	if (from && typeof from === "object" || typeof from === "function") for (var keys = __getOwnPropNames(from), i = 0, n = keys.length, key; i < n; i++) {
-		key = keys[i];
-		if (!__hasOwnProp.call(to, key) && key !== except) __defProp(to, key, {
-			get: ((k) => from[k]).bind(null, key),
-			enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable
-		});
-	}
-	return to;
-};
-var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", {
-	value: mod,
-	enumerable: true
-}) : target, mod));
-
-//#endregion
-const neoevents = __toESM(require("neoevents"));
+import { NeoEvent } from "neoevents";
 
 //#region src/consts.ts
 const IDLE_TIMEOUT = 60;
@@ -118,13 +95,13 @@ let OutcomePayloadEventType = /* @__PURE__ */ function(OutcomePayloadEventType$1
 	OutcomePayloadEventType$1["CHANNEL"] = "p.channel";
 	return OutcomePayloadEventType$1;
 }({});
-var OutcomePayloadSocketEvent = class extends neoevents.NeoEvent {
+var OutcomePayloadSocketEvent = class extends NeoEvent {
 	constructor(socket_id, payload) {
 		super(OutcomePayloadEventType.SOCKET, payload);
 		this.socket_id = socket_id;
 	}
 };
-var OutcomePayloadChannelEvent = class extends neoevents.NeoEvent {
+var OutcomePayloadChannelEvent = class extends NeoEvent {
 	constructor(channel_id, payload) {
 		super(OutcomePayloadEventType.CHANNEL, payload);
 		this.channel_id = channel_id;
@@ -132,81 +109,4 @@ var OutcomePayloadChannelEvent = class extends neoevents.NeoEvent {
 };
 
 //#endregion
-Object.defineProperty(exports, 'CHANNEL_BROADCAST', {
-  enumerable: true,
-  get: function () {
-    return CHANNEL_BROADCAST;
-  }
-});
-Object.defineProperty(exports, 'CHANNEL_GROUP_PREFIX', {
-  enumerable: true,
-  get: function () {
-    return CHANNEL_GROUP_PREFIX;
-  }
-});
-Object.defineProperty(exports, 'IDLE_TIMEOUT', {
-  enumerable: true,
-  get: function () {
-    return IDLE_TIMEOUT;
-  }
-});
-Object.defineProperty(exports, 'IDLE_TIMEOUT_DISCONNECT_MS', {
-  enumerable: true,
-  get: function () {
-    return IDLE_TIMEOUT_DISCONNECT_MS;
-  }
-});
-Object.defineProperty(exports, 'IDLE_TIMEOUT_PING_MS', {
-  enumerable: true,
-  get: function () {
-    return IDLE_TIMEOUT_PING_MS;
-  }
-});
-Object.defineProperty(exports, 'OutcomePayloadChannelEvent', {
-  enumerable: true,
-  get: function () {
-    return OutcomePayloadChannelEvent;
-  }
-});
-Object.defineProperty(exports, 'OutcomePayloadEventType', {
-  enumerable: true,
-  get: function () {
-    return OutcomePayloadEventType;
-  }
-});
-Object.defineProperty(exports, 'OutcomePayloadSocketEvent', {
-  enumerable: true,
-  get: function () {
-    return OutcomePayloadSocketEvent;
-  }
-});
-Object.defineProperty(exports, 'PayloadType', {
-  enumerable: true,
-  get: function () {
-    return PayloadType;
-  }
-});
-Object.defineProperty(exports, 'TIMEFRAME_PING_DISCONNECT_MS', {
-  enumerable: true,
-  get: function () {
-    return TIMEFRAME_PING_DISCONNECT_MS;
-  }
-});
-Object.defineProperty(exports, '__toESM', {
-  enumerable: true,
-  get: function () {
-    return __toESM;
-  }
-});
-Object.defineProperty(exports, 'buildPayload', {
-  enumerable: true,
-  get: function () {
-    return buildPayload;
-  }
-});
-Object.defineProperty(exports, 'parsePayload', {
-  enumerable: true,
-  get: function () {
-    return parsePayload;
-  }
-});
+export { parsePayload as a, CHANNEL_GROUP_PREFIX as c, IDLE_TIMEOUT_PING_MS as d, TIMEFRAME_PING_DISCONNECT_MS as f, buildPayload as i, IDLE_TIMEOUT as l, OutcomePayloadEventType as n, PayloadType as o, OutcomePayloadSocketEvent as r, CHANNEL_BROADCAST as s, OutcomePayloadChannelEvent as t, IDLE_TIMEOUT_DISCONNECT_MS as u };

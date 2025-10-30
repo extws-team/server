@@ -23,12 +23,9 @@ declare class ExtWSClient extends NeoEventTarget {
     ip
   }: ClientOptions);
   join(group_id: string): void;
-  // eslint-disable-next-line class-methods-use-this
   protected addToChannel(_channel_id: string): void;
   leave(group_id: string): void;
-  // eslint-disable-next-line class-methods-use-this
   protected removeFromChannel(_channel_id: string): void;
-  // eslint-disable-next-line class-methods-use-this
   protected sendPayload(_payload: string): void;
   send(): void;
   send(event_type: string): void;
@@ -96,12 +93,10 @@ declare class ExtWS extends NeoEventTarget<EventMap> {
   * @param _channel_id -
   * @param _payload -
   */
-  // eslint-disable-next-line class-methods-use-this
   protected publish(_channel_id: string, _payload: string): void;
   private deferClientsWatch;
   private pingSilentClients;
   private disconnectDeadClients;
-  // eslint-disable-next-line class-methods-use-this
   close(): Promise<void>;
 }
 //#endregion
@@ -126,4 +121,4 @@ type ExtWSOnBeforeUpgradeHandler = (options: {
   ip: ExtWSClient["ip"];
 }) => Promisable<Response | undefined>;
 //#endregion
-export { ExtWS, ExtWSClient, ExtWSEvent, ExtWSOnBeforeUpgradeHandler, OutcomePayloadChannelEvent, OutcomePayloadEventType, OutcomePayloadSocketEvent, Payload, PayloadData, PayloadType, Promisable };
+export { Promisable as a, OutcomePayloadEventType as c, ExtWSClient as d, PayloadType as i, OutcomePayloadSocketEvent as l, Payload as n, ExtWS as o, PayloadData as r, OutcomePayloadChannelEvent as s, ExtWSOnBeforeUpgradeHandler as t, ExtWSEvent as u };

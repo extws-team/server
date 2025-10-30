@@ -1,4 +1,4 @@
-const require_outcome_event = require('./outcome-event-DMrRECXk.cjs');
+const require_outcome_event = require('./outcome-event-CXWFk4zR.cjs');
 
 exports.CHANNEL_BROADCAST = require_outcome_event.CHANNEL_BROADCAST;
 exports.CHANNEL_GROUP_PREFIX = require_outcome_event.CHANNEL_GROUP_PREFIX;

@@ -1,4 +1,4 @@
-import { CHANNEL_BROADCAST, CHANNEL_GROUP_PREFIX, IDLE_TIMEOUT, IDLE_TIMEOUT_DISCONNECT_MS, IDLE_TIMEOUT_PING_MS, OutcomePayloadChannelEvent$1 as OutcomePayloadChannelEvent, OutcomePayloadSocketEvent$1 as OutcomePayloadSocketEvent, PayloadType$1 as PayloadType, TIMEFRAME_PING_DISCONNECT_MS, buildPayload, parsePayload } from "./outcome-event-C10k8UJf.js";
+import { a as parsePayload, c as CHANNEL_GROUP_PREFIX, d as IDLE_TIMEOUT_PING_MS, f as TIMEFRAME_PING_DISCONNECT_MS, i as buildPayload, l as IDLE_TIMEOUT, o as PayloadType, r as OutcomePayloadSocketEvent, s as CHANNEL_BROADCAST, t as OutcomePayloadChannelEvent, u as IDLE_TIMEOUT_DISCONNECT_MS } from "./outcome-event-BytSUkTz.js";
 import { NeoEvent, NeoEventTarget } from "neoevents";
 import { customAlphabet } from "nanoid";
 
@@ -69,7 +69,7 @@ var ExtWSClient = class extends NeoEventTarget {
 //#endregion
 //#region src/main.ts
 var ExtWS = class extends NeoEventTarget {
-	clients = new Map();
+	clients = /* @__PURE__ */ new Map();
 	has_adapter = false;
 	constructor() {
 		super();
@@ -134,20 +134,14 @@ var ExtWS = class extends NeoEventTarget {
 	}
 	pingSilentClients() {
 		const ts_now_ms = Date.now();
-		for (const client of this.clients.values()) {
-			const idle_ms = ts_now_ms - (client.stat.ts_last_active ?? 0);
-			if (idle_ms >= IDLE_TIMEOUT_PING_MS) client.ping();
-		}
+		for (const client of this.clients.values()) if (ts_now_ms - (client.stat.ts_last_active ?? 0) >= IDLE_TIMEOUT_PING_MS) client.ping();
 		setTimeout(() => {
 			this.disconnectDeadClients();
 		}, TIMEFRAME_PING_DISCONNECT_MS);
 	}
 	disconnectDeadClients() {
 		const ts_now_ms = Date.now();
-		for (const client of this.clients.values()) {
-			const idle_ms = ts_now_ms - (client.stat.ts_last_active ?? 0);
-			if (idle_ms >= IDLE_TIMEOUT_DISCONNECT_MS) client.disconnect();
-		}
+		for (const client of this.clients.values()) if (ts_now_ms - (client.stat.ts_last_active ?? 0) >= IDLE_TIMEOUT_DISCONNECT_MS) client.disconnect();
 		this.deferClientsWatch();
 	}
 	close() {

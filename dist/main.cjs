@@ -1,6 +1,8 @@
-const require_outcome_event = require('./outcome-event-DMrRECXk.cjs');
-const neoevents = require_outcome_event.__toESM(require("neoevents"));
-const nanoid = require_outcome_event.__toESM(require("nanoid"));
+const require_outcome_event = require('./outcome-event-CXWFk4zR.cjs');
+let neoevents = require("neoevents");
+neoevents = require_outcome_event.__toESM(neoevents);
+let nanoid = require("nanoid");
+nanoid = require_outcome_event.__toESM(nanoid);
 
 //#region src/event.ts
 var ExtWSEvent = class extends neoevents.NeoEvent {
@@ -69,7 +71,7 @@ var ExtWSClient = class extends neoevents.NeoEventTarget {
 //#endregion
 //#region src/main.ts
 var ExtWS = class extends neoevents.NeoEventTarget {
-	clients = new Map();
+	clients = /* @__PURE__ */ new Map();
 	has_adapter = false;
 	constructor() {
 		super();
@@ -134,20 +136,14 @@ var ExtWS = class extends neoevents.NeoEventTarget {
 	}
 	pingSilentClients() {
 		const ts_now_ms = Date.now();
-		for (const client of this.clients.values()) {
-			const idle_ms = ts_now_ms - (client.stat.ts_last_active ?? 0);
-			if (idle_ms >= require_outcome_event.IDLE_TIMEOUT_PING_MS) client.ping();
-		}
+		for (const client of this.clients.values()) if (ts_now_ms - (client.stat.ts_last_active ?? 0) >= require_outcome_event.IDLE_TIMEOUT_PING_MS) client.ping();
 		setTimeout(() => {
 			this.disconnectDeadClients();
 		}, require_outcome_event.TIMEFRAME_PING_DISCONNECT_MS);
 	}
 	disconnectDeadClients() {
 		const ts_now_ms = Date.now();
-		for (const client of this.clients.values()) {
-			const idle_ms = ts_now_ms - (client.stat.ts_last_active ?? 0);
-			if (idle_ms >= require_outcome_event.IDLE_TIMEOUT_DISCONNECT_MS) client.disconnect();
-		}
+		for (const client of this.clients.values()) if (ts_now_ms - (client.stat.ts_last_active ?? 0) >= require_outcome_event.IDLE_TIMEOUT_DISCONNECT_MS) client.disconnect();
 		this.deferClientsWatch();
 	}
 	close() {
