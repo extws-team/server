@@ -1,9 +1,8 @@
-Object.defineProperty(exports, Symbol.toStringTag, { value: "Module" });
-const require_outcome_event = require("./outcome-event-UTS0FGfF.cjs");
-let neoevents = require("neoevents");
-let nanoid = require("nanoid");
+import { a as parsePayload, i as buildPayload, r as OutcomePayloadSocketEvent, s as CHANNEL_BROADCAST, t as OutcomePayloadChannelEvent } from "./outcome-event-CpX-1fLz.mjs";
+import { NeoEvent, NeoEventTarget } from "neoevents";
+import { customAlphabet } from "nanoid";
 //#region src/event.ts
-var ExtWSEvent = class extends neoevents.NeoEvent {
+var ExtWSEvent = class extends NeoEvent {
 	client;
 	constructor(type, client, data) {
 		super(type, data);
@@ -12,12 +11,12 @@ var ExtWSEvent = class extends neoevents.NeoEvent {
 };
 //#endregion
 //#region src/client.ts
-const nanoid$1 = (0, nanoid.customAlphabet)("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz", 16);
+const nanoid = customAlphabet("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz", 16);
 /** Returns the data whose presence is enforced by ClientOptions. */
 function getClientData(options) {
 	return options.data;
 }
-var ExtWSClient = class extends neoevents.NeoEventTarget {
+var ExtWSClient = class extends NeoEventTarget {
 	id;
 	server;
 	url;
@@ -27,7 +26,7 @@ var ExtWSClient = class extends neoevents.NeoEventTarget {
 	stat = { ts_last_active: Date.now() };
 	constructor(server, options) {
 		super();
-		this.id = nanoid$1();
+		this.id = nanoid();
 		this.server = server;
 		this.url = options.url;
 		this.headers = options.headers;
@@ -53,11 +52,11 @@ var ExtWSClient = class extends neoevents.NeoEventTarget {
 	}
 	send(arg0, arg1) {
 		if (this.connection_state !== "connected") return;
-		this.sendPayload(require_outcome_event.buildPayload(4, arg0, arg1));
+		this.sendPayload(buildPayload(4, arg0, arg1));
 	}
 	ping() {
 		if (this.connection_state !== "connected") return;
-		this.sendPayload(require_outcome_event.buildPayload(2));
+		this.sendPayload(buildPayload(2));
 	}
 	closeTransport() {
 		throw new Error("Method \"closeTransport()\" must be defined by ExtWSClient extension.");
@@ -116,7 +115,7 @@ function validateTimeout(name, value) {
 	if (!Number.isFinite(value) || value < 0) throw new RangeError(`Healthcheck option "${name}" must be a finite, non-negative number.`);
 	return value;
 }
-var ExtWS = class extends neoevents.NeoEventTarget {
+var ExtWS = class extends NeoEventTarget {
 	clients = /* @__PURE__ */ new Map();
 	has_adapter = false;
 	healthcheck;
@@ -145,7 +144,7 @@ var ExtWS = class extends neoevents.NeoEventTarget {
 	rollbackClientConnection(client, initialization_error) {
 		this.clients.delete(client.id);
 		try {
-			client.removeFromChannel(require_outcome_event.CHANNEL_BROADCAST);
+			client.removeFromChannel(CHANNEL_BROADCAST);
 		} catch (error) {
 			throw new AggregateError([initialization_error, error], "Failed to initialize client and roll back its broadcast subscription.");
 		}
@@ -157,8 +156,8 @@ var ExtWS = class extends neoevents.NeoEventTarget {
 		}
 		this.clients.set(client.id, client);
 		try {
-			client.addToChannel(require_outcome_event.CHANNEL_BROADCAST);
-			client.sendPayload(require_outcome_event.buildPayload(1, {
+			client.addToChannel(CHANNEL_BROADCAST);
+			client.sendPayload(buildPayload(1, {
 				id: client.id,
 				idle_timeout: this.healthcheck.idle_timeout
 			}));
@@ -176,10 +175,10 @@ var ExtWS = class extends neoevents.NeoEventTarget {
 		client.stat.ts_last_active = Date.now();
 		client.stat.ts_pinged_for_activity = void 0;
 		this.scheduleHealthcheck();
-		const { payload_type, event_type, data } = require_outcome_event.parsePayload(payload);
+		const { payload_type, event_type, data } = parsePayload(payload);
 		switch (payload_type) {
 			case 2:
-				client.sendPayload(require_outcome_event.buildPayload(3));
+				client.sendPayload(buildPayload(3));
 				break;
 			case 4: {
 				if (event_type && RESERVED_EVENT_TYPES.has(event_type)) break;
@@ -196,18 +195,18 @@ var ExtWS = class extends neoevents.NeoEventTarget {
 			if (arg2 !== void 0) client.send(arg1, arg2);
 			else if (arg1 === void 0) client.send();
 			else client.send(arg1);
-		} else if (this.has_adapter) this.dispatchEvent(new require_outcome_event.OutcomePayloadSocketEvent(socket_id, require_outcome_event.buildPayload(4, arg1, arg2)));
+		} else if (this.has_adapter) this.dispatchEvent(new OutcomePayloadSocketEvent(socket_id, buildPayload(4, arg1, arg2)));
 	}
 	sendToGroup(group_id, arg1, arg2) {
 		const channel_id = "g-" + group_id;
-		const payload = require_outcome_event.buildPayload(4, arg1, arg2);
+		const payload = buildPayload(4, arg1, arg2);
 		this.publish(channel_id, payload);
-		if (this.has_adapter) this.dispatchEvent(new require_outcome_event.OutcomePayloadChannelEvent(channel_id, payload));
+		if (this.has_adapter) this.dispatchEvent(new OutcomePayloadChannelEvent(channel_id, payload));
 	}
 	broadcast(arg0, arg1) {
-		const payload = require_outcome_event.buildPayload(4, arg0, arg1);
-		this.publish(require_outcome_event.CHANNEL_BROADCAST, payload);
-		if (this.has_adapter) this.dispatchEvent(new require_outcome_event.OutcomePayloadChannelEvent(require_outcome_event.CHANNEL_BROADCAST, payload));
+		const payload = buildPayload(4, arg0, arg1);
+		this.publish(CHANNEL_BROADCAST, payload);
+		if (this.has_adapter) this.dispatchEvent(new OutcomePayloadChannelEvent(CHANNEL_BROADCAST, payload));
 	}
 	/**
 	* Sends a message to a specific group of clients. THis method should be implemented by WebSocket server implementation.
@@ -270,6 +269,4 @@ var ExtWS = class extends neoevents.NeoEventTarget {
 	}
 };
 //#endregion
-exports.ExtWS = ExtWS;
-exports.ExtWSClient = ExtWSClient;
-exports.ExtWSEvent = ExtWSEvent;
+export { ExtWS, ExtWSClient, ExtWSEvent };

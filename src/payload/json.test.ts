@@ -1,6 +1,17 @@
 import { describe, expect, test } from 'vitest';
-import { parsePayload } from '../payload/json.js';
+import { buildPayload, parsePayload } from '../payload/json.js';
 import { PayloadType } from '../payload/types.js';
+
+describe('buildPayload', () => {
+	test('preserves serialized JSON data exactly', () => {
+		const data = '{ "z": 1, "a": [ true, null ] }';
+
+		expect(buildPayload(PayloadType.MESSAGE, data)).toBe(`4${data}`);
+		expect(buildPayload(PayloadType.MESSAGE, 'event', data)).toBe(
+			`4event${data}`,
+		);
+	});
+});
 
 describe('parsePayload', () => {
 	test('should decode and parse an ArrayBuffer payload', () => {

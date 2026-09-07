@@ -1,6 +1,9 @@
-import { configCommon } from '@kirick/lint/eslint/common';
-import { configNode } from '@kirick/lint/eslint/node';
-import { configOxlint } from '@kirick/lint/eslint/oxlint';
+import { eslint } from '@kirick/lint/eslint';
 import { defineConfig } from 'eslint/config';
 
-export default defineConfig([...configCommon, ...configNode, ...configOxlint]);
+export default defineConfig(
+	{
+		ignores: ['_MIGRATE_OLD_*', 'oxlint.config.ts'],
+	},
+	eslint,
+);

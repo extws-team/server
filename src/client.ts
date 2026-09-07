@@ -12,37 +12,65 @@ const nanoid = customAlphabet(
 	16,
 );
 
-interface ExtWSClientStat {
+export interface ExtWSClientStat {
 	ts_last_active: number;
+	ts_pinged_for_activity?: number;
 }
 
-export interface ClientOptions {
+interface ClientBaseOptions {
 	url: URL;
 	headers: Headers;
 	ip: IP;
 }
 
-export class ExtWSClient extends NeoEventTarget {
+export type ClientOptions<ClientData = undefined> = ClientBaseOptions &
+	(undefined extends ClientData ? { data?: ClientData } : { data: ClientData });
+
+export type ExtWSClientEventMap<ClientData> = {
+	connect: ExtWSEvent<undefined, ClientData>;
+	disconnect: ExtWSEvent<undefined, ClientData>;
+} & Record<string, ExtWSEvent<unknown, ClientData>>;
+
+/** Returns the data whose presence is enforced by ClientOptions. */
+function getClientData<ClientData>(
+	options: ClientOptions<ClientData>,
+): ClientData;
+/** Returns the data whose presence is enforced by ClientOptions. */
+function getClientData(
+	options: ClientBaseOptions & { data?: unknown },
+): unknown {
+	return options.data;
+}
+
+export class ExtWSClient<ClientData = undefined> extends NeoEventTarget<
+	ExtWSClientEventMap<ClientData>
+> {
 	id: string;
-	server: ExtWS;
+	server: ExtWS<ClientData>;
 	url: URL;
 	headers: Headers;
 	ip: IP;
+	data: ClientData;
 	stat: ExtWSClientStat = {
 		ts_last_active: Date.now(),
 	};
 
-	constructor(server: ExtWS, { url, headers, ip }: ClientOptions) {
+	constructor(server: ExtWS<ClientData>, options: ClientOptions<ClientData>) {
 		super();
 
 		this.id = nanoid();
 		this.server = server;
-		this.url = url;
-		this.headers = headers;
-		this.ip = ip;
+		this.url = options.url;
+		this.headers = options.headers;
+		this.ip = options.ip;
+		this.data = getClientData(options);
 	}
 
 	join(group_id: string): void {
+		if (this.connection_state !== 'connected') {
+			return;
+		}
+
 		this.addToChannel(CHANNEL_GROUP_PREFIX + group_id);
 	}
 
@@ -54,6 +82,10 @@ export class ExtWSClient extends NeoEventTarget {
 	}
 
 	leave(group_id: string): void {
+		if (this.connection_state !== 'connected') {
+			return;
+		}
+
 		this.removeFromChannel(CHANNEL_GROUP_PREFIX + group_id);
 	}
 
@@ -71,37 +103,74 @@ export class ExtWSClient extends NeoEventTarget {
 		);
 	}
 
-	send(): void;
-	send(event_type: string): void;
-	send(data: PayloadData): void;
+	send(event_type_or_data?: PayloadData): void;
 	send(event_type: string, data: PayloadData): void;
-	send(arg0?: string | PayloadData, arg1?: PayloadData): void;
-	send(arg0?: string | PayloadData, arg1?: PayloadData) {
+	send(arg0?: string | PayloadData, arg1?: PayloadData): void {
+		if (this.connection_state !== 'connected') {
+			return;
+		}
+
 		this.sendPayload(buildPayload(PayloadType.MESSAGE, arg0, arg1));
 	}
 
 	ping(): void {
+		if (this.connection_state !== 'connected') {
+			return;
+		}
+
 		this.sendPayload(buildPayload(PayloadType.PING));
 	}
 
-	private is_disconnected = false;
+	// oxlint-disable-next-line class-methods-use-this
+	protected closeTransport(): void {
+		throw new Error(
+			'Method "closeTransport()" must be defined by ExtWSClient extension.',
+		);
+	}
 
-	/**
-	 * Disconnects client.
-	 * @param _is_disconnected - If true, client is already disconnected from the Websocket server.
-	 */
-	disconnect(_is_disconnected = false): void {
-		if (this.is_disconnected === false) {
-			const event = new ExtWSEvent('disconnect', this, undefined);
+	private connection_state: 'connected' | 'disconnecting' | 'disconnected' =
+		'connected';
 
-			this.dispatchEvent(event);
-			this.server.dispatchEvent(event);
-
-			this.is_disconnected = true;
-
-			this.destroy();
+	/** Requests physical transport close and finalizes the core lifecycle. */
+	disconnect(): void {
+		if (this.connection_state !== 'connected') {
+			return;
 		}
 
+		this.connection_state = 'disconnecting';
+
+		try {
+			this.closeTransport();
+		} finally {
+			this.finalizeDisconnect();
+		}
+	}
+
+	/** Finalizes the core lifecycle after the transport closes externally. */
+	transportClosed(): void {
+		this.finalizeDisconnect();
+	}
+
+	private finalizeDisconnect(): void {
+		if (this.connection_state === 'disconnected') {
+			return;
+		}
+
+		this.connection_state = 'disconnected';
 		this.server.clients.delete(this.id);
+		// @ts-expect-error Core lifecycle coordination with ExtWS.
+		this.server.scheduleHealthcheck();
+
+		const event = new ExtWSEvent('disconnect', this, undefined);
+
+		try {
+			this.dispatchEvent(event);
+		} finally {
+			try {
+				this.server.dispatchEvent(event);
+			} finally {
+				this.destroy();
+			}
+		}
 	}
 }

@@ -1,10 +1,6 @@
+// oxlint-disable max-lines-per-function max-lines
 import { beforeEach, describe, expect, test, vi } from 'vitest';
-import {
-	CHANNEL_BROADCAST,
-	CHANNEL_GROUP_PREFIX,
-	IDLE_TIMEOUT_PING_MS,
-	TIMEFRAME_PING_DISCONNECT_MS,
-} from '../src/consts.js';
+import { CHANNEL_BROADCAST, CHANNEL_GROUP_PREFIX } from '../src/consts.js';
 import { ExtWSTest, TestPublishEvent } from '../test/server.js';
 import type { ExtWSEvent } from './event.js';
 import { OutcomePayloadEventType } from './payload/outcome-event.js';
@@ -17,18 +13,20 @@ const server = new ExtWSTest();
  * @returns -
  */
 function shouldHang(promise: Promise<unknown>) {
-	return new Promise((resolve, reject) => {
-		setTimeout(resolve, 100);
+	return Promise.race([
+		new Promise<void>((resolve) => {
+			setTimeout(resolve, 100);
+		}),
+		(async () => {
+			try {
+				await promise;
+			} catch {
+				throw new Error('Promise rejected');
+			}
 
-		// eslint-disable-next-line promise/catch-or-return, promise/always-return
-		promise.then(() => {
-			reject(new Error('Promise resolved'));
-		});
-
-		promise.catch(() => {
-			reject(new Error('Promise rejected'));
-		});
-	});
+			throw new Error('Promise resolved');
+		})(),
+	]);
 }
 
 describe('ExtWS', () => {
@@ -40,6 +38,19 @@ describe('ExtWS', () => {
 		const event = await promise;
 
 		expect(event.type).toBe('connect');
+	});
+
+	test('client data', async () => {
+		const server_with_data = new ExtWSTest<{ user_id: string }>();
+		const promise = server_with_data.wait('connect');
+
+		server_with_data.open({ user_id: 'initial' });
+
+		const { client } = await promise;
+		expect(client.data.user_id).toBe('initial');
+
+		client.data = { user_id: 'updated' };
+		expect(client.data.user_id).toBe('updated');
 	});
 
 	test('addToGroup', async () => {
@@ -63,24 +74,109 @@ describe('ExtWS', () => {
 		expect(startsWith).toBe(true);
 	});
 
-	test('ping & disconnect if client is silent', async () => {
+	test('healthcheck runs on exact client deadlines', async () => {
 		vi.useFakeTimers();
 
-		const server_local = new ExtWSTest();
-		server_local.open();
+		const server_local = new ExtWSTest({
+			healthcheck: { idle_timeout: 10, timeframe_ping_disconnect: 2 },
+		});
 
-		const promise_ping = server_local.wait('test.sendPayload');
-		const promise_disconnect = server_local.wait('disconnect');
+		try {
+			const client = server_local.open();
+			expect(client.hook_calls.sendPayload).toBe(1);
 
-		vi.advanceTimersByTime(IDLE_TIMEOUT_PING_MS);
-		const event_ping = await promise_ping;
-		expect(event_ping).not.toBe(undefined);
-		expect(event_ping.detail).toBe('2');
+			vi.advanceTimersByTime(7999);
+			expect(client.hook_calls.sendPayload).toBe(1);
+			expect(client.hook_calls.closeTransport).toBe(0);
 
-		vi.advanceTimersByTime(TIMEFRAME_PING_DISCONNECT_MS);
-		expect(await promise_disconnect).not.toBe(undefined);
+			vi.advanceTimersByTime(1);
+			expect(client.hook_calls.sendPayload).toBe(2);
 
-		vi.useRealTimers();
+			vi.advanceTimersByTime(1999);
+			expect(client.hook_calls.closeTransport).toBe(0);
+
+			vi.advanceTimersByTime(1);
+			expect(client.hook_calls.closeTransport).toBe(1);
+			expect(server_local.clients.size).toBe(0);
+		} finally {
+			await server_local.close();
+			vi.useRealTimers();
+		}
+	});
+
+	test('healthcheck continues after a client transport error', async () => {
+		vi.useFakeTimers();
+
+		const server_local = new ExtWSTest({
+			healthcheck: { idle_timeout: 10, timeframe_ping_disconnect: 2 },
+		});
+
+		try {
+			const failing_client = server_local.open();
+			const healthy_client = server_local.open();
+			failing_client.hook_errors.sendPayload = new Error('ping failed');
+
+			vi.advanceTimersByTime(8000);
+			expect(failing_client.hook_calls.sendPayload).toBe(2);
+			expect(healthy_client.hook_calls.sendPayload).toBe(2);
+			expect(vi.getTimerCount()).toBe(1);
+
+			vi.advanceTimersByTime(2000);
+			expect(failing_client.hook_calls.closeTransport).toBe(1);
+			expect(healthy_client.hook_calls.closeTransport).toBe(1);
+			expect(vi.getTimerCount()).toBe(0);
+		} finally {
+			await server_local.close();
+			vi.useRealTimers();
+		}
+	});
+
+	test('healthcheck deadlines are relative to each client', async () => {
+		vi.useFakeTimers();
+
+		const server_local = new ExtWSTest({
+			healthcheck: { idle_timeout: 10, timeframe_ping_disconnect: 2 },
+		});
+
+		try {
+			vi.advanceTimersByTime(10_001);
+			const client = server_local.open();
+
+			vi.advanceTimersByTime(7999);
+			expect(client.hook_calls.sendPayload).toBe(1);
+
+			vi.advanceTimersByTime(1);
+			expect(client.hook_calls.sendPayload).toBe(2);
+
+			vi.advanceTimersByTime(2000);
+			expect(client.hook_calls.closeTransport).toBe(1);
+		} finally {
+			await server_local.close();
+			vi.useRealTimers();
+		}
+	});
+
+	test('close stops healthcheck and disconnects clients', async () => {
+		vi.useFakeTimers();
+
+		try {
+			const server_local = new ExtWSTest();
+			server_local.open();
+			const promise_disconnect = server_local.wait('disconnect');
+
+			expect(vi.getTimerCount()).toBe(1);
+
+			await server_local.close();
+			await promise_disconnect;
+
+			expect(server_local.clients.size).toBe(0);
+			expect(vi.getTimerCount()).toBe(0);
+
+			await server_local.close();
+			expect(vi.getTimerCount()).toBe(0);
+		} finally {
+			vi.useRealTimers();
+		}
 	});
 
 	test('invalid payload', () => {
@@ -105,7 +201,7 @@ describe('client', () => {
 		test('join', async () => {
 			const client = server.open();
 			const promise = server.wait('test.addToChannel');
-			client?.join('foo');
+			expect(client.join('foo')).toBeUndefined();
 
 			const event = await promise;
 			expect(event.detail).toStrictEqual({
@@ -198,6 +294,16 @@ describe('server -> client', () => {
 			const event = await promise;
 			expect(event.detail).toStrictEqual('4test{"foo":"bar"}');
 		});
+
+		test('preserves serialized JSON exactly', async () => {
+			const data = '{ "z": 1, "a": [ true, null ] }';
+			const promise = server.wait('test.sendPayload');
+
+			client.send('test', data);
+
+			const event = await promise;
+			expect(event.detail).toBe(`4test${data}`);
+		});
 	});
 
 	describe('server.sendToSocket', () => {
@@ -238,6 +344,16 @@ describe('server -> client', () => {
 			const event = await promise;
 			expect(event.detail).toStrictEqual('4extws_event{"foo":"bar"}');
 		});
+
+		test('preserves serialized JSON exactly', async () => {
+			const data = '{ "z": 1, "a": [ true, null ] }';
+			const promise = server.wait('test.sendPayload');
+
+			server.sendToSocket(client.id, 'extws_event', data);
+
+			const event = await promise;
+			expect(event.detail).toBe(`4extws_event${data}`);
+		});
 	});
 
 	describe('server.sendToGroup', () => {
@@ -247,7 +363,7 @@ describe('server -> client', () => {
 			server.sendToGroup('channel');
 
 			const event = await promise;
-			if (event instanceof TestPublishEvent !== true) {
+			if (!(event instanceof TestPublishEvent)) {
 				throw new TypeError('Invalid event type');
 			}
 
@@ -261,7 +377,7 @@ describe('server -> client', () => {
 			server.sendToGroup('channel', 'extws_event');
 
 			const event = await promise;
-			if (event instanceof TestPublishEvent !== true) {
+			if (!(event instanceof TestPublishEvent)) {
 				throw new TypeError('Invalid event type');
 			}
 
@@ -275,7 +391,7 @@ describe('server -> client', () => {
 			server.sendToGroup('channel', { foo: 'bar' });
 
 			const event = await promise;
-			if (event instanceof TestPublishEvent !== true) {
+			if (!(event instanceof TestPublishEvent)) {
 				throw new TypeError('Invalid event type');
 			}
 
@@ -289,12 +405,26 @@ describe('server -> client', () => {
 			server.sendToGroup('channel', 'extws_event', { foo: 'bar' });
 
 			const event = await promise;
-			if (event instanceof TestPublishEvent !== true) {
+			if (!(event instanceof TestPublishEvent)) {
 				throw new TypeError('Invalid event type');
 			}
 
 			expect(event.group_id).toBe('g-channel');
 			expect(event.payload).toStrictEqual('4extws_event{"foo":"bar"}');
+		});
+
+		test('preserves serialized JSON exactly', async () => {
+			const data = '{ "z": 1, "a": [ true, null ] }';
+			const promise = server.wait(TestPublishEvent.type);
+
+			server.sendToGroup('channel', 'extws_event', data);
+
+			const event = await promise;
+			if (!(event instanceof TestPublishEvent)) {
+				throw new TypeError('Invalid event type');
+			}
+
+			expect(event.payload).toBe(`4extws_event${data}`);
 		});
 	});
 
@@ -305,7 +435,7 @@ describe('server -> client', () => {
 			server.broadcast();
 
 			const event = await promise;
-			if (event instanceof TestPublishEvent !== true) {
+			if (!(event instanceof TestPublishEvent)) {
 				throw new TypeError('Invalid event type');
 			}
 
@@ -319,7 +449,7 @@ describe('server -> client', () => {
 			server.broadcast('extws_event');
 
 			const event = await promise;
-			if (event instanceof TestPublishEvent !== true) {
+			if (!(event instanceof TestPublishEvent)) {
 				throw new TypeError('Invalid event type');
 			}
 
@@ -333,7 +463,7 @@ describe('server -> client', () => {
 			server.broadcast({ foo: 'bar' });
 
 			const event = await promise;
-			if (event instanceof TestPublishEvent !== true) {
+			if (!(event instanceof TestPublishEvent)) {
 				throw new TypeError('Invalid event type');
 			}
 
@@ -347,12 +477,26 @@ describe('server -> client', () => {
 			server.broadcast('extws_event', { foo: 'bar' });
 
 			const event = await promise;
-			if (event instanceof TestPublishEvent !== true) {
+			if (!(event instanceof TestPublishEvent)) {
 				throw new TypeError('Invalid event type');
 			}
 
 			expect(event.group_id).toStrictEqual('broadcast');
 			expect(event.payload).toStrictEqual('4extws_event{"foo":"bar"}');
+		});
+
+		test('preserves serialized JSON exactly', async () => {
+			const data = '{ "z": 1, "a": [ true, null ] }';
+			const promise = server.wait(TestPublishEvent.type);
+
+			server.broadcast('extws_event', data);
+
+			const event = await promise;
+			if (!(event instanceof TestPublishEvent)) {
+				throw new TypeError('Invalid event type');
+			}
+
+			expect(event.payload).toBe(`4extws_event${data}`);
 		});
 	});
 });
@@ -394,12 +538,13 @@ describe('adapter', () => {
 		});
 
 		test('sendToSocket', async () => {
+			const data = '{ "z": 1, "a": [ true, null ] }';
 			const promise = server.wait(OutcomePayloadEventType.SOCKET);
 
-			server.sendToSocket('777', { foo: 'bar' });
+			server.sendToSocket('777', 'extws_event', data);
 
 			const event = await promise;
-			expect(event.detail).toStrictEqual('4{"foo":"bar"}');
+			expect(event.detail).toBe(`4extws_event${data}`);
 		});
 
 		test('sendToGroup', async () => {

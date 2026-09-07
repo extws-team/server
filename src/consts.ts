@@ -1,10 +1,10 @@
-export const IDLE_TIMEOUT: number = 60;
-export const TIMEFRAME_PING_DISCONNECT: number = 5;
+export const IDLE_TIMEOUT = 60;
+export const TIMEFRAME_PING_DISCONNECT = 5;
 export const IDLE_TIMEOUT_DISCONNECT_MS: number = IDLE_TIMEOUT * 1e3;
 export const TIMEFRAME_PING_DISCONNECT_MS: number =
 	TIMEFRAME_PING_DISCONNECT * 1e3;
 export const IDLE_TIMEOUT_PING_MS: number =
 	IDLE_TIMEOUT_DISCONNECT_MS - TIMEFRAME_PING_DISCONNECT_MS;
 
-export const CHANNEL_BROADCAST: string = 'broadcast';
-export const CHANNEL_GROUP_PREFIX: string = 'g-';
+export const CHANNEL_BROADCAST = 'broadcast';
+export const CHANNEL_GROUP_PREFIX = 'g-';

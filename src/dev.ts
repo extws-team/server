@@ -16,6 +16,7 @@ export {
 
 export {
 	type ExtWSOnBeforeUpgradeHandler,
+	type Payload,
 	type PayloadData,
 	PayloadType,
 	type Promisable,
