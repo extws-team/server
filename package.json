@@ -9,18 +9,18 @@
 	"exports": {
 		".": {
 			"types": {
-				"import": "./dist/main.d.ts",
+				"import": "./dist/main.d.mts",
 				"require": "./dist/main.d.cts"
 			},
-			"import": "./dist/main.js",
+			"import": "./dist/main.mjs",
 			"require": "./dist/main.cjs"
 		},
 		"./dev": {
 			"types": {
-				"import": "./dist/dev.d.ts",
+				"import": "./dist/dev.d.mts",
 				"require": "./dist/dev.d.cts"
 			},
-			"import": "./dist/dev.js",
+			"import": "./dist/dev.mjs",
 			"require": "./dist/dev.cjs"
 		}
 	},
@@ -28,30 +28,28 @@
 		"node": ">=20"
 	},
 	"dependencies": {
-		"nanoid": "3.3.8",
+		"nanoid": "6.0.1",
 		"neoevents": "0.3.0"
 	},
 	"peerDependencies": {
-		"@kirick/ip": "^0.1.1"
+		"@kirick/ip": "^0.2.1"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.3.1",
-		"@kirick/lint": "0.2.12",
-		"@types/node": "^20",
-		"eslint": "9.38.0",
-		"oxlint": "1.24.0",
-		"publint": "0.3.15",
-		"tsdown": "0.15.11",
-		"typescript": "5.9.3",
-		"unplugin-unused": "0.5.4",
+		"@biomejs/biome": "2.5.4",
+		"@kirick/lint": "0.4.1",
+		"@types/node": "20.19.43",
+		"eslint": "10.7.0",
+		"oxlint": "1.74.0",
+		"publint": "0.3.24",
+		"tsdown": "0.23.0",
+		"typescript": "6.0.3",
+		"unplugin-unused": "0.6.0",
 		"vitest": "4.0.4"
 	},
 	"scripts": {
-		"build": "tsdown src/main.ts src/dev.ts --clean --tsconfig tsconfig.main.json --publint --unused --dts --format esm --format cjs",
-		"check": "bun run lint && bun run build && bun run test",
-		"lint": "biome format && oxlint && eslint . && tsc -b",
-		"test": "vitest run --no-file-parallelism",
-		"# test:note": "# no bun test because it doesn't support fake timers for setTimeout/setInterval"
+		"build": "tsdown src/main.ts src/dev.ts --clean --publint --unused --dts --format esm --format cjs",
+		"check": "lint && bun run build && bun run test",
+		"test": "bun test && vitest run --no-file-parallelism"
 	},
 	"repository": {
 		"type": "git",

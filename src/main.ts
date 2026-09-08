@@ -22,12 +22,10 @@ type EventMap = {
 	disconnect: ExtWSEvent<undefined>;
 	[OutcomePayloadEventType.SOCKET]: OutcomePayloadSocketEvent;
 	[OutcomePayloadEventType.CHANNEL]: OutcomePayloadChannelEvent;
-} & {
-	[key: string]: ExtWSEvent;
-};
+} & Record<string, ExtWSEvent>;
 
 export class ExtWS extends NeoEventTarget<EventMap> {
-	clients: Map<string, ExtWSClient> = new Map();
+	clients: Map<string, ExtWSClient> = new Map<string, ExtWSClient>();
 	has_adapter = false;
 
 	constructor() {
@@ -70,14 +68,14 @@ export class ExtWS extends NeoEventTarget<EventMap> {
 				client.sendPayload(buildPayload(PayloadType.PONG));
 				break;
 
-			case PayloadType.MESSAGE:
-				{
-					const event = new ExtWSEvent(event_type ?? 'message', client, data);
+			case PayloadType.MESSAGE: {
+				const event = new ExtWSEvent(event_type ?? 'message', client, data);
 
-					client.dispatchEvent(event);
-					this.dispatchEvent(event);
-				}
+				client.dispatchEvent(event);
+				this.dispatchEvent(event);
+
 				break;
+			}
 
 			// no default
 		}

@@ -4,13 +4,13 @@ import { ExtWSEvent } from '../src/event.js';
 export class ExtWSTestClient extends ExtWSClient {
 	private channels = new Map<string, Set<ExtWSClient>>();
 
-	protected override sendPayload(payload: string) {
+	protected override sendPayload(payload: string): void {
 		const event = new ExtWSEvent('test.sendPayload', this, payload);
 
 		this.server.dispatchEvent(event);
 	}
 
-	protected override addToChannel(channel_id: string) {
+	protected override addToChannel(channel_id: string): void {
 		const event = new ExtWSEvent('test.addToChannel', this, {
 			channel: channel_id,
 		});
@@ -27,7 +27,7 @@ export class ExtWSTestClient extends ExtWSClient {
 		}
 	}
 
-	protected override removeFromChannel(channel_id: string) {
+	protected override removeFromChannel(channel_id: string): void {
 		const event = new ExtWSEvent('test.removeFromChannel', this, {
 			channel: channel_id,
 		});

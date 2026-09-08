@@ -15,7 +15,7 @@ export class TestPublishEvent extends Event {
 }
 
 export class ExtWSTest extends ExtWS {
-	open() {
+	open(): ExtWSTestClient {
 		const client = new ExtWSTestClient(this, {
 			url: new URL('http://ws'),
 			headers: new Headers(),
@@ -31,7 +31,7 @@ export class ExtWSTest extends ExtWS {
 		super.onMessage(client, payload);
 	}
 
-	protected override publish(group_id: string, payload: string) {
+	protected override publish(group_id: string, payload: string): void {
 		this.dispatchEvent(new TestPublishEvent(group_id, payload));
 	}
 }
