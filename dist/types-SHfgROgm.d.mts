@@ -1,6 +1,5 @@
 import { NeoEvent, NeoEventTarget } from "neoevents";
 import { IP } from "@kirick/ip";
-
 //#region src/client.d.ts
 interface ExtWSClientStat {
   ts_last_active: number;
@@ -17,27 +16,22 @@ declare class ExtWSClient extends NeoEventTarget {
   headers: Headers;
   ip: IP;
   stat: ExtWSClientStat;
-  constructor(server: ExtWS, {
-    url,
-    headers,
-    ip
-  }: ClientOptions);
+  constructor(server: ExtWS, { url, headers, ip }: ClientOptions);
   join(group_id: string): void;
-  protected addToChannel(_channel_id: string): void;
+  /** @internal */
+  _addToChannel(_channel_id: string): void;
   leave(group_id: string): void;
-  protected removeFromChannel(_channel_id: string): void;
-  protected sendPayload(_payload: string): void;
-  send(): void;
-  send(event_type: string): void;
-  send(data: PayloadData): void;
-  send(event_type: string, data: PayloadData): void;
-  send(arg0?: string | PayloadData, arg1?: PayloadData): void;
+  /** @internal */
+  _removeFromChannel(_channel_id: string): void;
+  /** @internal */
+  _sendPayload(_payload: string): void;
+  send(event_type_or_data?: string | PayloadData, data?: PayloadData): void;
   ping(): void;
   private is_disconnected;
   /**
-  * Disconnects client.
-  * @param _is_disconnected - If true, client is already disconnected from the Websocket server.
-  */
+   * Disconnects client.
+   * @param _is_disconnected - If true, client is already disconnected from the Websocket server.
+   */
   disconnect(_is_disconnected?: boolean): void;
 }
 //#endregion
@@ -50,7 +44,7 @@ declare class ExtWSEvent<D = unknown> extends NeoEvent<D> {
 //#region src/payload/outcome-event.d.ts
 declare enum OutcomePayloadEventType {
   SOCKET = "p.socket",
-  CHANNEL = "p.channel",
+  CHANNEL = "p.channel"
 }
 declare class OutcomePayloadSocketEvent extends NeoEvent<string> {
   socket_id: string;
@@ -67,36 +61,28 @@ type EventMap = {
   disconnect: ExtWSEvent<undefined>;
   [OutcomePayloadEventType.SOCKET]: OutcomePayloadSocketEvent;
   [OutcomePayloadEventType.CHANNEL]: OutcomePayloadChannelEvent;
-} & {
-  [key: string]: ExtWSEvent;
-};
+} & Record<string, ExtWSEvent>;
 declare class ExtWS extends NeoEventTarget<EventMap> {
   clients: Map<string, ExtWSClient>;
   has_adapter: boolean;
   constructor();
   protected onConnect(client: ExtWSClient): void;
   protected onMessage(client: ExtWSClient, payload: string | Buffer): void;
-  sendToSocket(socket_id: string): void;
-  sendToSocket(socket_id: string, event_type: string): void;
-  sendToSocket(socket_id: string, data: PayloadData): void;
+  sendToSocket(socket_id: string, event_type_or_data?: string | PayloadData): void;
   sendToSocket(socket_id: string, event_type: string, data: PayloadData): void;
-  sendToGroup(group_id: string): void;
-  sendToGroup(group_id: string, event_type: string): void;
-  sendToGroup(group_id: string, data: PayloadData): void;
+  sendToGroup(group_id: string, event_type_or_data?: string | PayloadData): void;
   sendToGroup(group_id: string, event_type: string, data: PayloadData): void;
-  broadcast(): void;
-  broadcast(event_type: string): void;
-  broadcast(data: PayloadData): void;
+  broadcast(event_type_or_data?: string | PayloadData): void;
   broadcast(event_type: string, data: PayloadData): void;
   /**
-  * Sends a message to a specific group of clients. THis method should be implemented by WebSocket server implementation.
-  * @param _channel_id -
-  * @param _payload -
-  */
+   * Sends a message to a specific group of clients. THis method should be implemented by WebSocket server implementation.
+   * @param _channel_id -
+   * @param _payload -
+   */
   protected publish(_channel_id: string, _payload: string): void;
-  private deferClientsWatch;
-  private pingSilentClients;
-  private disconnectDeadClients;
+  _deferClientsWatch(): void;
+  _pingSilentClients(): void;
+  _disconnectDeadClients(): void;
   close(): Promise<void>;
 }
 //#endregion
@@ -113,7 +99,7 @@ declare enum PayloadType {
   INIT = 1,
   PING = 2,
   PONG = 3,
-  MESSAGE = 4,
+  MESSAGE = 4
 }
 type ExtWSOnBeforeUpgradeHandler = (options: {
   url: ExtWSClient["url"];

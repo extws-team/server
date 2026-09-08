@@ -1,6 +1,7 @@
 import { type Payload, type PayloadData, PayloadType } from './types.js';
 
-const PRINT_ERRORS =
+const SHOULD_PRINT_ERRORS =
+	// oxlint-disable-next-line node/no-process-env
 	process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test';
 
 /**
@@ -15,7 +16,7 @@ export function buildPayload(
 	argument1?: string | PayloadData,
 	argument2?: PayloadData,
 ): string {
-	let payload: string = String(payload_type);
+	let payload = String(payload_type);
 	let event_type: string | undefined;
 	let data: PayloadData | undefined;
 
@@ -99,7 +100,7 @@ export function parsePayload(
 	let event_type = '';
 	for (
 		let index = start;
-		index < payload.length && JSON_START.has(payload[index]!) === false;
+		index < payload.length && !JSON_START.has(payload[index]!);
 		index++
 	) {
 		event_type += payload[index];
@@ -107,7 +108,7 @@ export function parsePayload(
 	}
 
 	if (event_type.length > 31) {
-		if (PRINT_ERRORS) {
+		if (SHOULD_PRINT_ERRORS) {
 			// oxlint-disable-next-line no-console
 			console.error(
 				`Event type cannot be longer than 31 characters, received "${event_type}"`,
@@ -128,7 +129,7 @@ export function parsePayload(
 		try {
 			result.data = JSON.parse(payload_raw);
 		} catch {
-			if (PRINT_ERRORS) {
+			if (SHOULD_PRINT_ERRORS) {
 				// oxlint-disable-next-line no-console
 				console.error(`Cannot parse payload "${payload_raw}": invalid JSON`);
 			}

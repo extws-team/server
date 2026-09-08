@@ -43,45 +43,45 @@ export class ExtWSClient extends NeoEventTarget {
 	}
 
 	join(group_id: string): void {
-		this.addToChannel(CHANNEL_GROUP_PREFIX + group_id);
+		this._addToChannel(CHANNEL_GROUP_PREFIX + group_id);
 	}
 
-	// oxlint-disable-next-line class-methods-use-this
-	protected addToChannel(_channel_id: string): void {
+	/** @internal */
+	// eslint-disable-next-line unicorn/prefer-private-class-fields, class-methods-use-this
+	_addToChannel(_channel_id: string): void {
 		throw new Error(
 			'Method "addToChannel(channel_id)" must be defined by ExtWSClient extension.',
 		);
 	}
 
 	leave(group_id: string): void {
-		this.removeFromChannel(CHANNEL_GROUP_PREFIX + group_id);
+		this._removeFromChannel(CHANNEL_GROUP_PREFIX + group_id);
 	}
 
-	// oxlint-disable-next-line class-methods-use-this
-	protected removeFromChannel(_channel_id: string): void {
+	/** @internal */
+	// eslint-disable-next-line unicorn/prefer-private-class-fields, class-methods-use-this
+	_removeFromChannel(_channel_id: string): void {
 		throw new Error(
 			'Method "removeFromChannel(channel_id)" must be defined by ExtWSClient extension.',
 		);
 	}
 
-	// oxlint-disable-next-line class-methods-use-this
-	protected sendPayload(_payload: string): void {
+	/** @internal */
+	// eslint-disable-next-line unicorn/prefer-private-class-fields, class-methods-use-this
+	_sendPayload(_payload: string): void {
 		throw new Error(
 			'Method "sendPayload(payload)" must be defined by ExtWSClient extension.',
 		);
 	}
 
-	send(): void;
-	send(event_type: string): void;
-	send(data: PayloadData): void;
-	send(event_type: string, data: PayloadData): void;
-	send(arg0?: string | PayloadData, arg1?: PayloadData): void;
-	send(arg0?: string | PayloadData, arg1?: PayloadData) {
-		this.sendPayload(buildPayload(PayloadType.MESSAGE, arg0, arg1));
+	send(event_type_or_data?: string | PayloadData, data?: PayloadData): void {
+		this._sendPayload(
+			buildPayload(PayloadType.MESSAGE, event_type_or_data, data),
+		);
 	}
 
 	ping(): void {
-		this.sendPayload(buildPayload(PayloadType.PING));
+		this._sendPayload(buildPayload(PayloadType.PING));
 	}
 
 	private is_disconnected = false;

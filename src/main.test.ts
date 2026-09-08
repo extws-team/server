@@ -1,3 +1,4 @@
+// oxlint-disable max-lines
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import {
 	CHANNEL_BROADCAST,
@@ -16,15 +17,16 @@ const server = new ExtWSTest();
  * @param promise The promise to check.
  * @returns -
  */
-function shouldHang(promise: Promise<unknown>) {
+function hastoHang(promise: Promise<unknown>) {
 	return new Promise((resolve, reject) => {
 		setTimeout(resolve, 100);
 
-		// eslint-disable-next-line promise/catch-or-return, promise/always-return
+		// oxlint-disable-next-line promise/catch-or-return, promise/always-return, promise/prefer-await-to-then
 		promise.then(() => {
 			reject(new Error('Promise resolved'));
 		});
 
+		// oxlint-disable-next-line promise/catch-or-return, promise/always-return, promise/prefer-await-to-then
 		promise.catch(() => {
 			reject(new Error('Promise rejected'));
 		});
@@ -105,6 +107,7 @@ describe('client', () => {
 		test('join', async () => {
 			const client = server.open();
 			const promise = server.wait('test.addToChannel');
+			// eslint-disable-next-line unicorn/no-unused-array-method-return
 			client?.join('foo');
 
 			const event = await promise;
@@ -247,7 +250,7 @@ describe('server -> client', () => {
 			server.sendToGroup('channel');
 
 			const event = await promise;
-			if (event instanceof TestPublishEvent !== true) {
+			if (!(event instanceof TestPublishEvent)) {
 				throw new TypeError('Invalid event type');
 			}
 
@@ -261,7 +264,7 @@ describe('server -> client', () => {
 			server.sendToGroup('channel', 'extws_event');
 
 			const event = await promise;
-			if (event instanceof TestPublishEvent !== true) {
+			if (!(event instanceof TestPublishEvent)) {
 				throw new TypeError('Invalid event type');
 			}
 
@@ -275,7 +278,7 @@ describe('server -> client', () => {
 			server.sendToGroup('channel', { foo: 'bar' });
 
 			const event = await promise;
-			if (event instanceof TestPublishEvent !== true) {
+			if (!(event instanceof TestPublishEvent)) {
 				throw new TypeError('Invalid event type');
 			}
 
@@ -289,7 +292,7 @@ describe('server -> client', () => {
 			server.sendToGroup('channel', 'extws_event', { foo: 'bar' });
 
 			const event = await promise;
-			if (event instanceof TestPublishEvent !== true) {
+			if (!(event instanceof TestPublishEvent)) {
 				throw new TypeError('Invalid event type');
 			}
 
@@ -305,7 +308,7 @@ describe('server -> client', () => {
 			server.broadcast();
 
 			const event = await promise;
-			if (event instanceof TestPublishEvent !== true) {
+			if (!(event instanceof TestPublishEvent)) {
 				throw new TypeError('Invalid event type');
 			}
 
@@ -319,7 +322,7 @@ describe('server -> client', () => {
 			server.broadcast('extws_event');
 
 			const event = await promise;
-			if (event instanceof TestPublishEvent !== true) {
+			if (!(event instanceof TestPublishEvent)) {
 				throw new TypeError('Invalid event type');
 			}
 
@@ -333,7 +336,7 @@ describe('server -> client', () => {
 			server.broadcast({ foo: 'bar' });
 
 			const event = await promise;
-			if (event instanceof TestPublishEvent !== true) {
+			if (!(event instanceof TestPublishEvent)) {
 				throw new TypeError('Invalid event type');
 			}
 
@@ -347,7 +350,7 @@ describe('server -> client', () => {
 			server.broadcast('extws_event', { foo: 'bar' });
 
 			const event = await promise;
-			if (event instanceof TestPublishEvent !== true) {
+			if (!(event instanceof TestPublishEvent)) {
 				throw new TypeError('Invalid event type');
 			}
 
@@ -364,7 +367,7 @@ describe('adapter', () => {
 		});
 
 		test('sendToSocket', async () => {
-			const promise = shouldHang(server.wait(OutcomePayloadEventType.SOCKET));
+			const promise = hastoHang(server.wait(OutcomePayloadEventType.SOCKET));
 
 			server.sendToSocket('777', { foo: 'bar' });
 
@@ -372,7 +375,7 @@ describe('adapter', () => {
 		});
 
 		test('sendToGroup', async () => {
-			const promise = shouldHang(server.wait(OutcomePayloadEventType.CHANNEL));
+			const promise = hastoHang(server.wait(OutcomePayloadEventType.CHANNEL));
 
 			server.sendToGroup('channel', { foo: 'bar' });
 
@@ -380,7 +383,7 @@ describe('adapter', () => {
 		});
 
 		test('broadcast', async () => {
-			const promise = shouldHang(server.wait(OutcomePayloadEventType.CHANNEL));
+			const promise = hastoHang(server.wait(OutcomePayloadEventType.CHANNEL));
 
 			server.broadcast({ foo: 'bar' });
 

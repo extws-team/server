@@ -3,6 +3,7 @@
 	"compilerOptions": {
 		"types": ["node"]
 	},
+	"stripInternal": true,
 	"include": ["src/"],
 	"exclude": ["dist/", "node_modules/"]
 }

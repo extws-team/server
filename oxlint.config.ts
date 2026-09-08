@@ -1,3 +1,4 @@
+/* eslint-disable n/no-unpublished-import */
 import { plugins, rules } from '@kirick/lint/oxlint';
 import { defineConfig } from 'oxlint';
 

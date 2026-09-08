@@ -1,4 +1,4 @@
-import { a as Promisable, c as OutcomePayloadEventType, i as PayloadType, l as OutcomePayloadSocketEvent, n as Payload, r as PayloadData, s as OutcomePayloadChannelEvent, t as ExtWSOnBeforeUpgradeHandler } from "./types-SHfgROgm.cjs";
+import { a as Promisable, c as OutcomePayloadEventType, i as PayloadType, l as OutcomePayloadSocketEvent, n as Payload, r as PayloadData, s as OutcomePayloadChannelEvent, t as ExtWSOnBeforeUpgradeHandler } from "./types-SHfgROgm.mjs";
 //#region src/consts.d.ts
 export declare const CHANNEL_BROADCAST = "broadcast";
 export declare const CHANNEL_GROUP_PREFIX = "g-";

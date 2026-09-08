@@ -1,15 +1,14 @@
-import { a as parsePayload, c as CHANNEL_GROUP_PREFIX, d as IDLE_TIMEOUT_PING_MS, f as TIMEFRAME_PING_DISCONNECT_MS, i as buildPayload, l as IDLE_TIMEOUT, o as PayloadType, r as OutcomePayloadSocketEvent, s as CHANNEL_BROADCAST, t as OutcomePayloadChannelEvent, u as IDLE_TIMEOUT_DISCONNECT_MS } from "./outcome-event-BytSUkTz.js";
+import { a as parsePayload, d as TIMEFRAME_PING_DISCONNECT_MS, i as buildPayload, r as OutcomePayloadSocketEvent, s as CHANNEL_BROADCAST, t as OutcomePayloadChannelEvent, u as IDLE_TIMEOUT_PING_MS } from "./outcome-event-C9ZHmiIq.mjs";
 import { NeoEvent, NeoEventTarget } from "neoevents";
 import { customAlphabet } from "nanoid";
-
 //#region src/event.ts
 var ExtWSEvent = class extends NeoEvent {
+	client;
 	constructor(type, client, data) {
 		super(type, data);
 		this.client = client;
 	}
 };
-
 //#endregion
 //#region src/client.ts
 const nanoid = customAlphabet("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz", 16);
@@ -29,25 +28,28 @@ var ExtWSClient = class extends NeoEventTarget {
 		this.ip = ip;
 	}
 	join(group_id) {
-		this.addToChannel(CHANNEL_GROUP_PREFIX + group_id);
+		this._addToChannel("g-" + group_id);
 	}
-	addToChannel(_channel_id) {
+	/** @internal */
+	_addToChannel(_channel_id) {
 		throw new Error("Method \"addToChannel(channel_id)\" must be defined by ExtWSClient extension.");
 	}
 	leave(group_id) {
-		this.removeFromChannel(CHANNEL_GROUP_PREFIX + group_id);
+		this._removeFromChannel("g-" + group_id);
 	}
-	removeFromChannel(_channel_id) {
+	/** @internal */
+	_removeFromChannel(_channel_id) {
 		throw new Error("Method \"removeFromChannel(channel_id)\" must be defined by ExtWSClient extension.");
 	}
-	sendPayload(_payload) {
+	/** @internal */
+	_sendPayload(_payload) {
 		throw new Error("Method \"sendPayload(payload)\" must be defined by ExtWSClient extension.");
 	}
-	send(arg0, arg1) {
-		this.sendPayload(buildPayload(PayloadType.MESSAGE, arg0, arg1));
+	send(event_type_or_data, data) {
+		this._sendPayload(buildPayload(4, event_type_or_data, data));
 	}
 	ping() {
-		this.sendPayload(buildPayload(PayloadType.PING));
+		this._sendPayload(buildPayload(2));
 	}
 	is_disconnected = false;
 	/**
@@ -65,7 +67,6 @@ var ExtWSClient = class extends NeoEventTarget {
 		this.server.clients.delete(this.id);
 	}
 };
-
 //#endregion
 //#region src/main.ts
 var ExtWS = class extends NeoEventTarget {
@@ -73,14 +74,14 @@ var ExtWS = class extends NeoEventTarget {
 	has_adapter = false;
 	constructor() {
 		super();
-		this.deferClientsWatch();
+		this._deferClientsWatch();
 	}
 	onConnect(client) {
 		this.clients.set(client.id, client);
-		client.addToChannel(CHANNEL_BROADCAST);
-		client.sendPayload(buildPayload(PayloadType.INIT, {
+		client._addToChannel(CHANNEL_BROADCAST);
+		client._sendPayload(buildPayload(1, {
 			id: client.id,
-			idle_timeout: IDLE_TIMEOUT
+			idle_timeout: 60
 		}));
 		const event = new ExtWSEvent("connect", client, void 0);
 		client.dispatchEvent(event);
@@ -91,31 +92,30 @@ var ExtWS = class extends NeoEventTarget {
 		client.stat.ts_last_active = Date.now();
 		const { payload_type, event_type, data } = parsePayload(payload);
 		switch (payload_type) {
-			case PayloadType.PING:
-				client.sendPayload(buildPayload(PayloadType.PONG));
+			case 2:
+				client._sendPayload(buildPayload(3));
 				break;
-			case PayloadType.MESSAGE:
-				{
-					const event = new ExtWSEvent(event_type ?? "message", client, data);
-					client.dispatchEvent(event);
-					this.dispatchEvent(event);
-				}
+			case 4: {
+				const event = new ExtWSEvent(event_type ?? "message", client, data);
+				client.dispatchEvent(event);
+				this.dispatchEvent(event);
 				break;
+			}
 		}
 	}
 	sendToSocket(socket_id, arg1, arg2) {
 		const client = this.clients.get(socket_id);
 		if (client instanceof ExtWSClient) client.send(arg1, arg2);
-		else if (this.has_adapter) this.dispatchEvent(new OutcomePayloadSocketEvent(socket_id, buildPayload(PayloadType.MESSAGE, arg1, arg2)));
+		else if (this.has_adapter) this.dispatchEvent(new OutcomePayloadSocketEvent(socket_id, buildPayload(4, arg1, arg2)));
 	}
 	sendToGroup(group_id, arg1, arg2) {
-		const channel_id = CHANNEL_GROUP_PREFIX + group_id;
-		const payload = buildPayload(PayloadType.MESSAGE, arg1, arg2);
+		const channel_id = "g-" + group_id;
+		const payload = buildPayload(4, arg1, arg2);
 		this.publish(channel_id, payload);
 		if (this.has_adapter) this.dispatchEvent(new OutcomePayloadChannelEvent(channel_id, payload));
 	}
 	broadcast(arg0, arg1) {
-		const payload = buildPayload(PayloadType.MESSAGE, arg0, arg1);
+		const payload = buildPayload(4, arg0, arg1);
 		this.publish(CHANNEL_BROADCAST, payload);
 		if (this.has_adapter) this.dispatchEvent(new OutcomePayloadChannelEvent(CHANNEL_BROADCAST, payload));
 	}
@@ -127,27 +127,26 @@ var ExtWS = class extends NeoEventTarget {
 	publish(_channel_id, _payload) {
 		throw new Error("Method not implemented.");
 	}
-	deferClientsWatch() {
+	_deferClientsWatch() {
 		setTimeout(() => {
-			this.pingSilentClients();
+			this._pingSilentClients();
 		}, IDLE_TIMEOUT_PING_MS);
 	}
-	pingSilentClients() {
+	_pingSilentClients() {
 		const ts_now_ms = Date.now();
-		for (const client of this.clients.values()) if (ts_now_ms - (client.stat.ts_last_active ?? 0) >= IDLE_TIMEOUT_PING_MS) client.ping();
+		for (const client of this.clients.values()) if (ts_now_ms - (client.stat.ts_last_active ?? 0) >= 55e3) client.ping();
 		setTimeout(() => {
-			this.disconnectDeadClients();
+			this._disconnectDeadClients();
 		}, TIMEFRAME_PING_DISCONNECT_MS);
 	}
-	disconnectDeadClients() {
+	_disconnectDeadClients() {
 		const ts_now_ms = Date.now();
-		for (const client of this.clients.values()) if (ts_now_ms - (client.stat.ts_last_active ?? 0) >= IDLE_TIMEOUT_DISCONNECT_MS) client.disconnect();
-		this.deferClientsWatch();
+		for (const client of this.clients.values()) if (ts_now_ms - (client.stat.ts_last_active ?? 0) >= 6e4) client.disconnect();
+		this._deferClientsWatch();
 	}
 	close() {
 		throw new Error("Method not implemented.");
 	}
 };
-
 //#endregion
 export { ExtWS, ExtWSClient, ExtWSEvent };
