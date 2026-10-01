@@ -4,6 +4,8 @@ const SHOULD_PRINT_ERRORS =
 	// oxlint-disable-next-line node/no-process-env
 	process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test';
 
+const JSON_START = new Set(['[', '{']);
+
 /**
  * Builds a payload.
  * @param payload_type The type of the payload.
@@ -20,26 +22,27 @@ export function buildPayload(
 	let event_type: string | undefined;
 	let data: PayloadData | undefined;
 
-	if (undefined === argument2 && typeof argument1 !== 'string') {
+	if (typeof argument1 === 'string' && !JSON_START.has(argument1[0]!)) {
+		event_type = argument1;
+		data = argument2;
+	} else {
 		data = argument1;
 		event_type = undefined;
-	} else if (typeof argument1 === 'string') {
-		data = argument2;
-		event_type = argument1;
 	}
 
 	if (event_type) {
 		payload += event_type;
 	}
 
-	if (data) {
+	if (typeof data === 'string') {
+		payload += data;
+	} else if (data) {
 		payload += JSON.stringify(data);
 	}
 
 	return payload;
 }
 
-const JSON_START = new Set(['[', '{']);
 const textDecoder = new TextDecoder();
 
 type TypedArray =

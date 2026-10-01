@@ -2,7 +2,7 @@ import type { ExtWSClient } from '../main.js';
 
 export type Promisable<T> = T | Promise<T>;
 
-export type PayloadData = Record<string, unknown> | unknown[];
+export type PayloadData = Record<string, unknown> | unknown[] | string;
 export interface Payload {
 	payload_type: PayloadType;
 	event_type?: string;
@@ -17,8 +17,11 @@ export enum PayloadType {
 	MESSAGE = 4,
 }
 
-export type ExtWSOnBeforeUpgradeHandler = (options: {
+export type ExtWSOnBeforeUpgradeHandler<ClientData = undefined> = (options: {
 	url: ExtWSClient['url'];
 	headers: ExtWSClient['headers'];
 	ip: ExtWSClient['ip'];
-}) => Promisable<Response | undefined>;
+}) => Promisable<
+	| Response
+	| ([ClientData] extends [undefined] ? undefined : { data: ClientData })
+>;

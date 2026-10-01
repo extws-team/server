@@ -1,6 +1,6 @@
 {
 	"name": "@extws/server",
-	"version": "0.3.0-dev",
+	"version": "0.3.1",
 	"description": "Base for simple ans powerful WebSocket server",
 	"publishConfig": {
 		"access": "public"

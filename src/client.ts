@@ -16,15 +16,21 @@ interface ExtWSClientStat {
 	ts_last_active: number;
 }
 
-export interface ClientOptions {
+export interface BaseClientOptions {
 	url: URL;
 	headers: Headers;
 	ip: IP;
 }
 
-export class ExtWSClient extends NeoEventTarget {
+export type ClientOptions<ClientData = undefined> = BaseClientOptions &
+	([ClientData] extends [undefined]
+		? { data?: undefined }
+		: { data: ClientData });
+
+export class ExtWSClient<ClientData = undefined> extends NeoEventTarget {
+	readonly data: ClientData;
 	id: string;
-	server: ExtWS;
+	server: ExtWS<ClientData>;
 	url: URL;
 	headers: Headers;
 	ip: IP;
@@ -32,7 +38,10 @@ export class ExtWSClient extends NeoEventTarget {
 		ts_last_active: Date.now(),
 	};
 
-	constructor(server: ExtWS, { url, headers, ip }: ClientOptions) {
+	constructor(
+		server: ExtWS<ClientData>,
+		{ url, headers, ip, data }: ClientOptions<ClientData>,
+	) {
 		super();
 
 		this.id = nanoid();
@@ -40,6 +49,7 @@ export class ExtWSClient extends NeoEventTarget {
 		this.url = url;
 		this.headers = headers;
 		this.ip = ip;
+		this.data = data as ClientData;
 	}
 
 	join(group_id: string): void {

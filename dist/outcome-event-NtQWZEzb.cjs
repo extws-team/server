@@ -1,7 +1,5 @@
-import { NeoEvent } from "neoevents";
-const IDLE_TIMEOUT_DISCONNECT_MS = 6e4;
-const TIMEFRAME_PING_DISCONNECT_MS = 5e3;
-const IDLE_TIMEOUT_PING_MS = 55e3;
+let neoevents = require("neoevents");
+//#region src/consts.ts
 const CHANNEL_BROADCAST = "broadcast";
 const CHANNEL_GROUP_PREFIX = "g-";
 //#endregion
@@ -17,6 +15,7 @@ let PayloadType = /* @__PURE__ */ function(PayloadType) {
 //#endregion
 //#region src/payload/json.ts
 const SHOULD_PRINT_ERRORS = process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test";
+const JSON_START = /* @__PURE__ */ new Set(["[", "{"]);
 /**
 * Builds a payload.
 * @param payload_type The type of the payload.
@@ -28,18 +27,18 @@ function buildPayload(payload_type, argument1, argument2) {
 	let payload = String(payload_type);
 	let event_type;
 	let data;
-	if (void 0 === argument2 && typeof argument1 !== "string") {
+	if (typeof argument1 === "string" && !JSON_START.has(argument1[0])) {
+		event_type = argument1;
+		data = argument2;
+	} else {
 		data = argument1;
 		event_type = void 0;
-	} else if (typeof argument1 === "string") {
-		data = argument2;
-		event_type = argument1;
 	}
 	if (event_type) payload += event_type;
-	if (data) payload += JSON.stringify(data);
+	if (typeof data === "string") payload += data;
+	else if (data) payload += JSON.stringify(data);
 	return payload;
 }
-const JSON_START = /* @__PURE__ */ new Set(["[", "{"]);
 const textDecoder = new TextDecoder();
 /**
 * Check if the value is a typed array.
@@ -88,14 +87,14 @@ let OutcomePayloadEventType = /* @__PURE__ */ function(OutcomePayloadEventType) 
 	OutcomePayloadEventType["CHANNEL"] = "p.channel";
 	return OutcomePayloadEventType;
 }({});
-var OutcomePayloadSocketEvent = class extends NeoEvent {
+var OutcomePayloadSocketEvent = class extends neoevents.NeoEvent {
 	socket_id;
 	constructor(socket_id, payload) {
 		super("p.socket", payload);
 		this.socket_id = socket_id;
 	}
 };
-var OutcomePayloadChannelEvent = class extends NeoEvent {
+var OutcomePayloadChannelEvent = class extends neoevents.NeoEvent {
 	channel_id;
 	constructor(channel_id, payload) {
 		super("p.channel", payload);
@@ -103,4 +102,51 @@ var OutcomePayloadChannelEvent = class extends NeoEvent {
 	}
 };
 //#endregion
-export { parsePayload as a, CHANNEL_GROUP_PREFIX as c, TIMEFRAME_PING_DISCONNECT_MS as d, buildPayload as i, IDLE_TIMEOUT_DISCONNECT_MS as l, OutcomePayloadEventType as n, PayloadType as o, OutcomePayloadSocketEvent as r, CHANNEL_BROADCAST as s, OutcomePayloadChannelEvent as t, IDLE_TIMEOUT_PING_MS as u };
+Object.defineProperty(exports, "CHANNEL_BROADCAST", {
+	enumerable: true,
+	get: function() {
+		return CHANNEL_BROADCAST;
+	}
+});
+Object.defineProperty(exports, "CHANNEL_GROUP_PREFIX", {
+	enumerable: true,
+	get: function() {
+		return CHANNEL_GROUP_PREFIX;
+	}
+});
+Object.defineProperty(exports, "OutcomePayloadChannelEvent", {
+	enumerable: true,
+	get: function() {
+		return OutcomePayloadChannelEvent;
+	}
+});
+Object.defineProperty(exports, "OutcomePayloadEventType", {
+	enumerable: true,
+	get: function() {
+		return OutcomePayloadEventType;
+	}
+});
+Object.defineProperty(exports, "OutcomePayloadSocketEvent", {
+	enumerable: true,
+	get: function() {
+		return OutcomePayloadSocketEvent;
+	}
+});
+Object.defineProperty(exports, "PayloadType", {
+	enumerable: true,
+	get: function() {
+		return PayloadType;
+	}
+});
+Object.defineProperty(exports, "buildPayload", {
+	enumerable: true,
+	get: function() {
+		return buildPayload;
+	}
+});
+Object.defineProperty(exports, "parsePayload", {
+	enumerable: true,
+	get: function() {
+		return parsePayload;
+	}
+});

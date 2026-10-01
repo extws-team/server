@@ -1,16 +1,11 @@
 // oxlint-disable max-lines
 import { beforeEach, describe, expect, test, vi } from 'vitest';
-import {
-	CHANNEL_BROADCAST,
-	CHANNEL_GROUP_PREFIX,
-	IDLE_TIMEOUT_PING_MS,
-	TIMEFRAME_PING_DISCONNECT_MS,
-} from '../src/consts.js';
+import { CHANNEL_BROADCAST, CHANNEL_GROUP_PREFIX } from '../src/consts.js';
 import { ExtWSTest, TestPublishEvent } from '../test/server.js';
 import type { ExtWSEvent } from './event.js';
 import { OutcomePayloadEventType } from './payload/outcome-event.js';
 
-const server = new ExtWSTest();
+const server = new ExtWSTest({ idle_timeout: 6 });
 
 /**
  * Resolves if the given promise hangs.
@@ -74,12 +69,14 @@ describe('ExtWS', () => {
 		const promise_ping = server_local.wait('test.sendPayload');
 		const promise_disconnect = server_local.wait('disconnect');
 
-		vi.advanceTimersByTime(IDLE_TIMEOUT_PING_MS);
+		vi.advanceTimersByTime(server_local.test_healthcheck.idle_timeout_ping_ms);
 		const event_ping = await promise_ping;
 		expect(event_ping).not.toBe(undefined);
 		expect(event_ping.detail).toBe('2');
 
-		vi.advanceTimersByTime(TIMEFRAME_PING_DISCONNECT_MS);
+		vi.advanceTimersByTime(
+			server_local.test_healthcheck.idle_timeout_disconnect_ms,
+		);
 		expect(await promise_disconnect).not.toBe(undefined);
 
 		vi.useRealTimers();

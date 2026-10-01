@@ -1,5 +1,5 @@
 Object.defineProperty(exports, Symbol.toStringTag, { value: "Module" });
-const require_outcome_event = require("./outcome-event-CzELapRu.cjs");
+const require_outcome_event = require("./outcome-event-NtQWZEzb.cjs");
 let neoevents = require("neoevents");
 let nanoid = require("nanoid");
 //#region src/event.ts
@@ -14,19 +14,21 @@ var ExtWSEvent = class extends neoevents.NeoEvent {
 //#region src/client.ts
 const nanoid$1 = (0, nanoid.customAlphabet)("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz", 16);
 var ExtWSClient = class extends neoevents.NeoEventTarget {
+	data;
 	id;
 	server;
 	url;
 	headers;
 	ip;
 	stat = { ts_last_active: Date.now() };
-	constructor(server, { url, headers, ip }) {
+	constructor(server, { url, headers, ip, data }) {
 		super();
 		this.id = nanoid$1();
 		this.server = server;
 		this.url = url;
 		this.headers = headers;
 		this.ip = ip;
+		this.data = data;
 	}
 	join(group_id) {
 		this._addToChannel("g-" + group_id);
@@ -69,12 +71,49 @@ var ExtWSClient = class extends neoevents.NeoEventTarget {
 	}
 };
 //#endregion
+//#region src/reserved-events.ts
+const RESERVED_EVENT_TYPES = /* @__PURE__ */ new Set([
+	"connect",
+	"disconnect",
+	"p.socket",
+	"p.channel"
+]);
+//#endregion
+//#region src/utils.ts
+/**
+* Validates a healthcheck timeout value.
+* @param value Value to validate.
+* @returns The validated timeout in seconds.
+*/
+function validateTimeout(value) {
+	if (typeof value !== "number") throw new TypeError(`Healthcheck option must be a number.`);
+	if (!Number.isFinite(value) || value < 0) throw new RangeError(`Healthcheck option must be a finite, non-negative number.`);
+	return value;
+}
+/** Creates healthcheck object */
+function createHealthcheck(idle_timeout) {
+	idle_timeout = validateTimeout(idle_timeout ?? 60);
+	const timeframe_ping_disconnect = 5;
+	if (timeframe_ping_disconnect >= idle_timeout) throw new RangeError("Healthcheck option \"timeframe_ping_disconnect\" must be less than \"idle_timeout\".");
+	const idle_timeout_disconnect_ms = idle_timeout * 1e3;
+	const timeframe_ping_disconnect_ms = timeframe_ping_disconnect * 1e3;
+	return {
+		idle_timeout,
+		timeframe_ping_disconnect,
+		timeframe_ping_disconnect_ms,
+		idle_timeout_disconnect_ms,
+		idle_timeout_ping_ms: idle_timeout_disconnect_ms - timeframe_ping_disconnect_ms
+	};
+}
+//#endregion
 //#region src/main.ts
 var ExtWS = class extends neoevents.NeoEventTarget {
 	clients = /* @__PURE__ */ new Map();
 	has_adapter = false;
-	constructor() {
+	healthcheck;
+	constructor({ idle_timeout } = {}) {
 		super();
+		this.healthcheck = createHealthcheck(idle_timeout);
 		this._deferClientsWatch();
 	}
 	onConnect(client) {
@@ -82,7 +121,7 @@ var ExtWS = class extends neoevents.NeoEventTarget {
 		client._addToChannel(require_outcome_event.CHANNEL_BROADCAST);
 		client._sendPayload(require_outcome_event.buildPayload(1, {
 			id: client.id,
-			idle_timeout: 60
+			idle_timeout: this.healthcheck.idle_timeout
 		}));
 		const event = new ExtWSEvent("connect", client, void 0);
 		client.dispatchEvent(event);
@@ -97,6 +136,7 @@ var ExtWS = class extends neoevents.NeoEventTarget {
 				client._sendPayload(require_outcome_event.buildPayload(3));
 				break;
 			case 4: {
+				if (event_type && RESERVED_EVENT_TYPES.has(event_type)) break;
 				const event = new ExtWSEvent(event_type ?? "message", client, data);
 				client.dispatchEvent(event);
 				this.dispatchEvent(event);
@@ -131,18 +171,18 @@ var ExtWS = class extends neoevents.NeoEventTarget {
 	_deferClientsWatch() {
 		setTimeout(() => {
 			this._pingSilentClients();
-		}, require_outcome_event.IDLE_TIMEOUT_PING_MS);
+		}, this.healthcheck.idle_timeout_ping_ms);
 	}
 	_pingSilentClients() {
 		const ts_now_ms = Date.now();
-		for (const client of this.clients.values()) if (ts_now_ms - (client.stat.ts_last_active ?? 0) >= 55e3) client.ping();
+		for (const client of this.clients.values()) if (ts_now_ms - (client.stat.ts_last_active ?? 0) >= this.healthcheck.idle_timeout_ping_ms) client.ping();
 		setTimeout(() => {
 			this._disconnectDeadClients();
-		}, require_outcome_event.TIMEFRAME_PING_DISCONNECT_MS);
+		}, this.healthcheck.timeframe_ping_disconnect_ms);
 	}
 	_disconnectDeadClients() {
 		const ts_now_ms = Date.now();
-		for (const client of this.clients.values()) if (ts_now_ms - (client.stat.ts_last_active ?? 0) >= 6e4) client.disconnect();
+		for (const client of this.clients.values()) if (ts_now_ms - (client.stat.ts_last_active ?? 0) >= this.healthcheck.idle_timeout_disconnect_ms) client.disconnect();
 		this._deferClientsWatch();
 	}
 	close() {

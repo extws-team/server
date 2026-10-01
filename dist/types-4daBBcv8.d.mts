@@ -4,19 +4,25 @@ import { IP } from "@kirick/ip";
 interface ExtWSClientStat {
   ts_last_active: number;
 }
-interface ClientOptions {
+interface BaseClientOptions {
   url: URL;
   headers: Headers;
   ip: IP;
 }
-declare class ExtWSClient extends NeoEventTarget {
+type ClientOptions<ClientData = undefined> = BaseClientOptions & ([ClientData] extends [undefined] ? {
+  data?: undefined;
+} : {
+  data: ClientData;
+});
+declare class ExtWSClient<ClientData = undefined> extends NeoEventTarget {
+  readonly data: ClientData;
   id: string;
-  server: ExtWS;
+  server: ExtWS<ClientData>;
   url: URL;
   headers: Headers;
   ip: IP;
   stat: ExtWSClientStat;
-  constructor(server: ExtWS, { url, headers, ip }: ClientOptions);
+  constructor(server: ExtWS<ClientData>, { url, headers, ip, data }: ClientOptions<ClientData>);
   join(group_id: string): void;
   /** @internal */
   _addToChannel(_channel_id: string): void;
@@ -36,9 +42,9 @@ declare class ExtWSClient extends NeoEventTarget {
 }
 //#endregion
 //#region src/event.d.ts
-declare class ExtWSEvent<D = unknown> extends NeoEvent<D> {
-  client: ExtWSClient;
-  constructor(type: string, client: ExtWSClient, data: D);
+declare class ExtWSEvent<D = unknown, ClientData = undefined> extends NeoEvent<D> {
+  client: ExtWSClient<ClientData>;
+  constructor(type: string, client: ExtWSClient<ClientData>, data: D);
 }
 //#endregion
 //#region src/payload/outcome-event.d.ts
@@ -56,18 +62,28 @@ declare class OutcomePayloadChannelEvent extends NeoEvent<string> {
 }
 //#endregion
 //#region src/main.d.ts
-type EventMap = {
-  connect: ExtWSEvent<undefined>;
-  disconnect: ExtWSEvent<undefined>;
+type EventMap<ClientData> = {
+  connect: ExtWSEvent<undefined, ClientData>;
+  disconnect: ExtWSEvent<undefined, ClientData>;
   [OutcomePayloadEventType.SOCKET]: OutcomePayloadSocketEvent;
   [OutcomePayloadEventType.CHANNEL]: OutcomePayloadChannelEvent;
-} & Record<string, ExtWSEvent>;
-declare class ExtWS extends NeoEventTarget<EventMap> {
-  clients: Map<string, ExtWSClient>;
+} & Record<string, ExtWSEvent<unknown, ClientData>>;
+interface ExtWSHealthcheck {
+  idle_timeout: number;
+  timeframe_ping_disconnect: number;
+  timeframe_ping_disconnect_ms: number;
+  idle_timeout_disconnect_ms: number;
+  idle_timeout_ping_ms: number;
+}
+declare class ExtWS<ClientData = undefined> extends NeoEventTarget<EventMap<ClientData>> {
+  clients: Map<string, ExtWSClient<ClientData>>;
   has_adapter: boolean;
-  constructor();
-  protected onConnect(client: ExtWSClient): void;
-  protected onMessage(client: ExtWSClient, payload: string | Buffer): void;
+  private healthcheck;
+  constructor({ idle_timeout }?: {
+    idle_timeout?: number;
+  });
+  protected onConnect(client: ExtWSClient<ClientData>): void;
+  protected onMessage(client: ExtWSClient<ClientData>, payload: string | Buffer): void;
   sendToSocket(socket_id: string, event_type_or_data?: string | PayloadData): void;
   sendToSocket(socket_id: string, event_type: string, data: PayloadData): void;
   sendToGroup(group_id: string, event_type_or_data?: string | PayloadData): void;
@@ -88,7 +104,7 @@ declare class ExtWS extends NeoEventTarget<EventMap> {
 //#endregion
 //#region src/payload/types.d.ts
 type Promisable<T> = T | Promise<T>;
-type PayloadData = Record<string, unknown> | unknown[];
+type PayloadData = Record<string, unknown> | unknown[] | string;
 interface Payload {
   payload_type: PayloadType;
   event_type?: string;
@@ -101,10 +117,12 @@ declare enum PayloadType {
   PONG = 3,
   MESSAGE = 4
 }
-type ExtWSOnBeforeUpgradeHandler = (options: {
+type ExtWSOnBeforeUpgradeHandler<ClientData = undefined> = (options: {
   url: ExtWSClient["url"];
   headers: ExtWSClient["headers"];
   ip: ExtWSClient["ip"];
-}) => Promisable<Response | undefined>;
+}) => Promisable<Response | ([ClientData] extends [undefined] ? undefined : {
+  data: ClientData;
+})>;
 //#endregion
-export { Promisable as a, OutcomePayloadEventType as c, ExtWSClient as d, PayloadType as i, OutcomePayloadSocketEvent as l, Payload as n, ExtWS as o, PayloadData as r, OutcomePayloadChannelEvent as s, ExtWSOnBeforeUpgradeHandler as t, ExtWSEvent as u };
+export { Promisable as a, OutcomePayloadChannelEvent as c, ExtWSEvent as d, ExtWSClient as f, PayloadType as i, OutcomePayloadEventType as l, Payload as n, ExtWS as o, PayloadData as r, ExtWSHealthcheck as s, ExtWSOnBeforeUpgradeHandler as t, OutcomePayloadSocketEvent as u };

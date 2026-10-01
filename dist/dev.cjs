@@ -1,5 +1,5 @@
 Object.defineProperty(exports, Symbol.toStringTag, { value: "Module" });
-const require_outcome_event = require("./outcome-event-CzELapRu.cjs");
+const require_outcome_event = require("./outcome-event-NtQWZEzb.cjs");
 exports.CHANNEL_BROADCAST = require_outcome_event.CHANNEL_BROADCAST;
 exports.CHANNEL_GROUP_PREFIX = require_outcome_event.CHANNEL_GROUP_PREFIX;
 exports.OutcomePayloadChannelEvent = require_outcome_event.OutcomePayloadChannelEvent;

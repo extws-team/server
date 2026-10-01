@@ -1,13 +1,6 @@
 import { NeoEventTarget } from 'neoevents';
 import { ExtWSClient } from './client.js';
-import {
-	CHANNEL_BROADCAST,
-	CHANNEL_GROUP_PREFIX,
-	IDLE_TIMEOUT,
-	IDLE_TIMEOUT_DISCONNECT_MS,
-	IDLE_TIMEOUT_PING_MS,
-	TIMEFRAME_PING_DISCONNECT_MS,
-} from './consts.js';
+import { CHANNEL_BROADCAST, CHANNEL_GROUP_PREFIX } from './consts.js';
 import { ExtWSEvent } from './event.js';
 import { buildPayload, parsePayload } from './payload/json.js';
 import {
@@ -16,25 +9,43 @@ import {
 	OutcomePayloadSocketEvent,
 } from './payload/outcome-event.js';
 import { type PayloadData, PayloadType } from './payload/types.js';
+import { RESERVED_EVENT_TYPES } from './reserved-events.js';
+import { createHealthcheck } from './utils.js';
 
-type EventMap = {
-	connect: ExtWSEvent<undefined>;
-	disconnect: ExtWSEvent<undefined>;
+type EventMap<ClientData> = {
+	connect: ExtWSEvent<undefined, ClientData>;
+	disconnect: ExtWSEvent<undefined, ClientData>;
 	[OutcomePayloadEventType.SOCKET]: OutcomePayloadSocketEvent;
 	[OutcomePayloadEventType.CHANNEL]: OutcomePayloadChannelEvent;
-} & Record<string, ExtWSEvent>;
+} & Record<string, ExtWSEvent<unknown, ClientData>>;
 
-export class ExtWS extends NeoEventTarget<EventMap> {
-	clients: Map<string, ExtWSClient> = new Map<string, ExtWSClient>();
+export interface ExtWSHealthcheck {
+	idle_timeout: number;
+	timeframe_ping_disconnect: number;
+	timeframe_ping_disconnect_ms: number;
+	idle_timeout_disconnect_ms: number;
+	idle_timeout_ping_ms: number;
+}
+
+export class ExtWS<ClientData = undefined> extends NeoEventTarget<
+	EventMap<ClientData>
+> {
+	clients: Map<string, ExtWSClient<ClientData>> = new Map<
+		string,
+		ExtWSClient<ClientData>
+	>();
 	has_adapter = false;
+	private healthcheck: ExtWSHealthcheck;
 
-	constructor() {
+	constructor({ idle_timeout }: { idle_timeout?: number } = {}) {
 		super();
+
+		this.healthcheck = createHealthcheck(idle_timeout);
 
 		this._deferClientsWatch();
 	}
 
-	protected onConnect(client: ExtWSClient): void {
+	protected onConnect(client: ExtWSClient<ClientData>): void {
 		this.clients.set(client.id, client);
 
 		client._addToChannel(CHANNEL_BROADCAST);
@@ -42,7 +53,7 @@ export class ExtWS extends NeoEventTarget<EventMap> {
 		client._sendPayload(
 			buildPayload(PayloadType.INIT, {
 				id: client.id,
-				idle_timeout: IDLE_TIMEOUT,
+				idle_timeout: this.healthcheck.idle_timeout,
 			}),
 		);
 
@@ -52,7 +63,10 @@ export class ExtWS extends NeoEventTarget<EventMap> {
 		this.dispatchEvent(event);
 	}
 
-	protected onMessage(client: ExtWSClient, payload: string | Buffer): void {
+	protected onMessage(
+		client: ExtWSClient<ClientData>,
+		payload: string | Buffer,
+	): void {
 		if (Buffer.isBuffer(payload)) {
 			payload = payload.toString('utf8');
 		}
@@ -67,6 +81,10 @@ export class ExtWS extends NeoEventTarget<EventMap> {
 				break;
 
 			case PayloadType.MESSAGE: {
+				if (event_type && RESERVED_EVENT_TYPES.has(event_type)) {
+					break;
+				}
+
 				const event = new ExtWSEvent(event_type ?? 'message', client, data);
 
 				client.dispatchEvent(event);
@@ -150,7 +168,7 @@ export class ExtWS extends NeoEventTarget<EventMap> {
 	_deferClientsWatch(): void {
 		setTimeout(() => {
 			this._pingSilentClients();
-		}, IDLE_TIMEOUT_PING_MS);
+		}, this.healthcheck.idle_timeout_ping_ms);
 	}
 
 	// eslint-disable-next-line unicorn/prefer-private-class-fields
@@ -160,14 +178,14 @@ export class ExtWS extends NeoEventTarget<EventMap> {
 		for (const client of this.clients.values()) {
 			const idle_ms = ts_now_ms - (client.stat.ts_last_active ?? 0);
 
-			if (idle_ms >= IDLE_TIMEOUT_PING_MS) {
+			if (idle_ms >= this.healthcheck.idle_timeout_ping_ms) {
 				client.ping();
 			}
 		}
 
 		setTimeout(() => {
 			this._disconnectDeadClients();
-		}, TIMEFRAME_PING_DISCONNECT_MS);
+		}, this.healthcheck.timeframe_ping_disconnect_ms);
 	}
 
 	// eslint-disable-next-line unicorn/prefer-private-class-fields
@@ -177,7 +195,7 @@ export class ExtWS extends NeoEventTarget<EventMap> {
 		for (const client of this.clients.values()) {
 			const idle_ms = ts_now_ms - (client.stat.ts_last_active ?? 0);
 
-			if (idle_ms >= IDLE_TIMEOUT_DISCONNECT_MS) {
+			if (idle_ms >= this.healthcheck.idle_timeout_disconnect_ms) {
 				client.disconnect();
 			}
 		}

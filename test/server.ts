@@ -1,6 +1,7 @@
 import { IP } from '@kirick/ip';
 import type { ExtWSClient } from '../src/client.js';
-import { ExtWS } from '../src/main.js';
+import { ExtWS, type ExtWSHealthcheck } from '../src/main.js';
+import { createHealthcheck } from '../src/utils.js';
 import { ExtWSTestClient } from './client.js';
 
 export class TestPublishEvent extends Event {
@@ -15,6 +16,13 @@ export class TestPublishEvent extends Event {
 }
 
 export class ExtWSTest extends ExtWS {
+	test_healthcheck: ExtWSHealthcheck;
+
+	constructor({ idle_timeout }: { idle_timeout?: number } = {}) {
+		super({ idle_timeout });
+		this.test_healthcheck = createHealthcheck(idle_timeout);
+	}
+
 	open(): ExtWSTestClient {
 		const client = new ExtWSTestClient(this, {
 			url: new URL('http://ws'),
