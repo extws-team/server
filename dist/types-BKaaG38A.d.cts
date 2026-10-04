@@ -79,6 +79,8 @@ declare class ExtWS<ClientData = undefined> extends NeoEventTarget<EventMap<Clie
   clients: Map<string, ExtWSClient<ClientData>>;
   has_adapter: boolean;
   private healthcheck;
+  private clients_watch_timer;
+  private clients_watch_stopped;
   constructor({ idle_timeout }?: {
     idle_timeout?: number;
   });
@@ -98,6 +100,7 @@ declare class ExtWS<ClientData = undefined> extends NeoEventTarget<EventMap<Clie
   protected publish(_channel_id: string, _payload: string): void;
   _deferClientsWatch(): void;
   _pingSilentClients(): void;
+  protected stopClientsWatch(): void;
   _disconnectDeadClients(): void;
   close(): Promise<void>;
 }

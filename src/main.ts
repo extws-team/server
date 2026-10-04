@@ -36,6 +36,8 @@ export class ExtWS<ClientData = undefined> extends NeoEventTarget<
 	>();
 	has_adapter = false;
 	private healthcheck: ExtWSHealthcheck;
+	private clients_watch_timer: ReturnType<typeof setTimeout> | undefined;
+	private clients_watch_stopped = false;
 
 	constructor({ idle_timeout }: { idle_timeout?: number } = {}) {
 		super();
@@ -166,7 +168,11 @@ export class ExtWS<ClientData = undefined> extends NeoEventTarget<
 
 	// eslint-disable-next-line unicorn/prefer-private-class-fields
 	_deferClientsWatch(): void {
-		setTimeout(() => {
+		if (this.clients_watch_stopped) {
+			return;
+		}
+
+		this.clients_watch_timer = setTimeout(() => {
 			this._pingSilentClients();
 		}, this.healthcheck.idle_timeout_ping_ms);
 	}
@@ -183,9 +189,22 @@ export class ExtWS<ClientData = undefined> extends NeoEventTarget<
 			}
 		}
 
-		setTimeout(() => {
+		if (this.clients_watch_stopped) {
+			return;
+		}
+
+		this.clients_watch_timer = setTimeout(() => {
 			this._disconnectDeadClients();
 		}, this.healthcheck.timeframe_ping_disconnect_ms);
+	}
+
+	protected stopClientsWatch(): void {
+		this.clients_watch_stopped = true;
+
+		if (this.clients_watch_timer !== undefined) {
+			clearTimeout(this.clients_watch_timer);
+			this.clients_watch_timer = undefined;
+		}
 	}
 
 	// eslint-disable-next-line unicorn/prefer-private-class-fields

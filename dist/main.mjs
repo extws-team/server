@@ -110,6 +110,8 @@ var ExtWS = class extends NeoEventTarget {
 	clients = /* @__PURE__ */ new Map();
 	has_adapter = false;
 	healthcheck;
+	clients_watch_timer;
+	clients_watch_stopped = false;
 	constructor({ idle_timeout } = {}) {
 		super();
 		this.healthcheck = createHealthcheck(idle_timeout);
@@ -168,16 +170,25 @@ var ExtWS = class extends NeoEventTarget {
 		throw new Error("Method not implemented.");
 	}
 	_deferClientsWatch() {
-		setTimeout(() => {
+		if (this.clients_watch_stopped) return;
+		this.clients_watch_timer = setTimeout(() => {
 			this._pingSilentClients();
 		}, this.healthcheck.idle_timeout_ping_ms);
 	}
 	_pingSilentClients() {
 		const ts_now_ms = Date.now();
 		for (const client of this.clients.values()) if (ts_now_ms - (client.stat.ts_last_active ?? 0) >= this.healthcheck.idle_timeout_ping_ms) client.ping();
-		setTimeout(() => {
+		if (this.clients_watch_stopped) return;
+		this.clients_watch_timer = setTimeout(() => {
 			this._disconnectDeadClients();
 		}, this.healthcheck.timeframe_ping_disconnect_ms);
+	}
+	stopClientsWatch() {
+		this.clients_watch_stopped = true;
+		if (this.clients_watch_timer !== void 0) {
+			clearTimeout(this.clients_watch_timer);
+			this.clients_watch_timer = void 0;
+		}
 	}
 	_disconnectDeadClients() {
 		const ts_now_ms = Date.now();
