@@ -6,6 +6,9 @@
 		"access": "public"
 	},
 	"type": "module",
+	"files": [
+		"dist/"
+	],
 	"exports": {
 		".": {
 			"types": {
@@ -28,15 +31,15 @@
 		"node": ">=20"
 	},
 	"dependencies": {
-		"nanoid": "6.0.1",
-		"neoevents": "0.3.0"
+		"nanoid": "6.0.2",
+		"neoevents": "0.3.1"
 	},
 	"peerDependencies": {
 		"@kirick/ip": "^0.2.1"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.5.4",
-		"@kirick/lint": "0.4.1",
+		"@kirick/lint": "0.4.2",
 		"@types/node": "20.19.43",
 		"eslint": "10.7.0",
 		"oxlint": "1.74.0",
@@ -44,11 +47,11 @@
 		"tsdown": "0.23.0",
 		"typescript": "6.0.3",
 		"unplugin-unused": "0.6.0",
-		"vitest": "4.0.4"
+		"vitest": "5.0.3"
 	},
 	"scripts": {
-		"build": "tsdown src/main.ts src/dev.ts --clean --publint --unused --dts --format esm --format cjs",
-		"check": "lint && bun run build && bun run test",
+		"build": "tsdown src/main.ts src/dev.ts --clean --dts --format esm --format cjs --unused --publint",
+		"check": "lint && bun run test && bun run build",
 		"test": "bun test && vitest run --no-file-parallelism"
 	},
 	"repository": {

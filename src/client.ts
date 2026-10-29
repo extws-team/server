@@ -46,8 +46,9 @@ export class ExtWSClient extends NeoEventTarget {
 		this.addToChannel(CHANNEL_GROUP_PREFIX + group_id);
 	}
 
+	/** @internal */
 	// oxlint-disable-next-line class-methods-use-this
-	protected addToChannel(_channel_id: string): void {
+	addToChannel(_channel_id: string): void {
 		throw new Error(
 			'Method "addToChannel(channel_id)" must be defined by ExtWSClient extension.',
 		);
@@ -57,25 +58,24 @@ export class ExtWSClient extends NeoEventTarget {
 		this.removeFromChannel(CHANNEL_GROUP_PREFIX + group_id);
 	}
 
+	/** @internal */
 	// oxlint-disable-next-line class-methods-use-this
-	protected removeFromChannel(_channel_id: string): void {
+	removeFromChannel(_channel_id: string): void {
 		throw new Error(
 			'Method "removeFromChannel(channel_id)" must be defined by ExtWSClient extension.',
 		);
 	}
 
+	/** @internal */
 	// oxlint-disable-next-line class-methods-use-this
-	protected sendPayload(_payload: string): void {
+	sendPayload(_payload: string): void {
 		throw new Error(
 			'Method "sendPayload(payload)" must be defined by ExtWSClient extension.',
 		);
 	}
 
-	send(): void;
-	send(event_type: string): void;
-	send(data: PayloadData): void;
-	send(event_type: string, data: PayloadData): void;
-	send(arg0?: string | PayloadData, arg1?: PayloadData): void;
+	send(data?: PayloadData): void;
+	send(event_type: string, data?: PayloadData): void;
 	send(arg0?: string | PayloadData, arg1?: PayloadData) {
 		this.sendPayload(buildPayload(PayloadType.MESSAGE, arg0, arg1));
 	}
@@ -84,20 +84,20 @@ export class ExtWSClient extends NeoEventTarget {
 		this.sendPayload(buildPayload(PayloadType.PING));
 	}
 
-	private is_disconnected = false;
+	#is_disconnected = false;
 
 	/**
 	 * Disconnects client.
 	 * @param _is_disconnected - If true, client is already disconnected from the Websocket server.
 	 */
 	disconnect(_is_disconnected = false): void {
-		if (this.is_disconnected === false) {
+		if (this.#is_disconnected === false) {
 			const event = new ExtWSEvent('disconnect', this, undefined);
 
 			this.dispatchEvent(event);
 			this.server.dispatchEvent(event);
 
-			this.is_disconnected = true;
+			this.#is_disconnected = true;
 
 			this.destroy();
 		}

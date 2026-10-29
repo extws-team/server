@@ -1,7 +1,11 @@
 import { type Payload, type PayloadData, PayloadType } from './types.js';
 
-const PRINT_ERRORS =
+const SHOULD_PRINT_ERRORS =
+	// oxlint-disable-next-line node/no-process-env
 	process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test';
+
+const EVENT_TYPE_MAX_LENGTH = 31;
+const JSON_START = new Set(['[', '{']);
 
 /**
  * Builds a payload.
@@ -15,19 +19,33 @@ export function buildPayload(
 	argument1?: string | PayloadData,
 	argument2?: PayloadData,
 ): string {
-	let payload: string = String(payload_type);
+	let payload = String(payload_type);
 	let event_type: string | undefined;
 	let data: PayloadData | undefined;
 
-	if (undefined === argument2 && typeof argument1 !== 'string') {
-		data = argument1;
-		event_type = undefined;
-	} else if (typeof argument1 === 'string') {
-		data = argument2;
+	if (typeof argument1 === 'string') {
 		event_type = argument1;
+		data = argument2;
+	} else {
+		data = argument1 ?? argument2;
 	}
 
 	if (event_type) {
+		// `parsePayload` cannot read back what it cannot scan, so reject it here instead of emitting a broken frame
+		if (event_type.length > EVENT_TYPE_MAX_LENGTH) {
+			throw new TypeError(
+				`Event type cannot be longer than ${EVENT_TYPE_MAX_LENGTH} characters, received "${event_type}".`,
+			);
+		}
+
+		for (const char of event_type) {
+			if (JSON_START.has(char)) {
+				throw new TypeError(
+					`Event type cannot contain "${char}", received "${event_type}".`,
+				);
+			}
+		}
+
 		payload += event_type;
 	}
 
@@ -38,7 +56,6 @@ export function buildPayload(
 	return payload;
 }
 
-const JSON_START = new Set(['[', '{']);
 const textDecoder = new TextDecoder();
 
 type TypedArray =
@@ -99,18 +116,18 @@ export function parsePayload(
 	let event_type = '';
 	for (
 		let index = start;
-		index < payload.length && JSON_START.has(payload[index]!) === false;
+		index < payload.length && !JSON_START.has(payload[index]!);
 		index++
 	) {
 		event_type += payload[index];
 		start++;
 	}
 
-	if (event_type.length > 31) {
-		if (PRINT_ERRORS) {
+	if (event_type.length > EVENT_TYPE_MAX_LENGTH) {
+		if (SHOULD_PRINT_ERRORS) {
 			// oxlint-disable-next-line no-console
 			console.error(
-				`Event type cannot be longer than 31 characters, received "${event_type}"`,
+				`Event type cannot be longer than ${EVENT_TYPE_MAX_LENGTH} characters, received "${event_type}"`,
 			);
 		}
 
@@ -128,7 +145,7 @@ export function parsePayload(
 		try {
 			result.data = JSON.parse(payload_raw);
 		} catch {
-			if (PRINT_ERRORS) {
+			if (SHOULD_PRINT_ERRORS) {
 				// oxlint-disable-next-line no-console
 				console.error(`Cannot parse payload "${payload_raw}": invalid JSON`);
 			}

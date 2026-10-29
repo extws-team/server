@@ -31,15 +31,13 @@ export class ExtWS extends NeoEventTarget<EventMap> {
 	constructor() {
 		super();
 
-		this.deferClientsWatch();
+		this.#deferClientsWatch();
 	}
 
 	protected onConnect(client: ExtWSClient): void {
 		this.clients.set(client.id, client);
 
-		// @ts-expect-error Property is protected
 		client.addToChannel(CHANNEL_BROADCAST);
-		// @ts-expect-error Property is protected
 		client.sendPayload(
 			buildPayload(PayloadType.INIT, {
 				id: client.id,
@@ -64,7 +62,6 @@ export class ExtWS extends NeoEventTarget<EventMap> {
 
 		switch (payload_type) {
 			case PayloadType.PING:
-				// @ts-expect-error using private property
 				client.sendPayload(buildPayload(PayloadType.PONG));
 				break;
 
@@ -81,10 +78,8 @@ export class ExtWS extends NeoEventTarget<EventMap> {
 		}
 	}
 
-	sendToSocket(socket_id: string): void;
-	sendToSocket(socket_id: string, event_type: string): void;
-	sendToSocket(socket_id: string, data: PayloadData): void;
-	sendToSocket(socket_id: string, event_type: string, data: PayloadData): void;
+	sendToSocket(socket_id: string, data?: PayloadData): void;
+	sendToSocket(socket_id: string, event_type: string, data?: PayloadData): void;
 	sendToSocket(
 		socket_id: string,
 		arg1?: string | PayloadData,
@@ -92,7 +87,11 @@ export class ExtWS extends NeoEventTarget<EventMap> {
 	) {
 		const client = this.clients.get(socket_id);
 		if (client instanceof ExtWSClient) {
-			client.send(arg1, arg2);
+			if (typeof arg1 === 'string') {
+				client.send(arg1, arg2);
+			} else {
+				client.send(arg1);
+			}
 		} else if (this.has_adapter) {
 			this.dispatchEvent(
 				new OutcomePayloadSocketEvent(
@@ -103,10 +102,8 @@ export class ExtWS extends NeoEventTarget<EventMap> {
 		}
 	}
 
-	sendToGroup(group_id: string): void;
-	sendToGroup(group_id: string, event_type: string): void;
-	sendToGroup(group_id: string, data: PayloadData): void;
-	sendToGroup(group_id: string, event_type: string, data: PayloadData): void;
+	sendToGroup(group_id: string, data?: PayloadData): void;
+	sendToGroup(group_id: string, event_type: string, data?: PayloadData): void;
 	sendToGroup(
 		group_id: string,
 		arg1?: string | PayloadData,
@@ -122,10 +119,8 @@ export class ExtWS extends NeoEventTarget<EventMap> {
 		}
 	}
 
-	broadcast(): void;
-	broadcast(event_type: string): void;
-	broadcast(data: PayloadData): void;
-	broadcast(event_type: string, data: PayloadData): void;
+	broadcast(data?: PayloadData): void;
+	broadcast(event_type: string, data?: PayloadData): void;
 	broadcast(arg0?: string | PayloadData, arg1?: PayloadData): void {
 		const payload = buildPayload(PayloadType.MESSAGE, arg0, arg1);
 
@@ -148,13 +143,16 @@ export class ExtWS extends NeoEventTarget<EventMap> {
 		throw new Error('Method not implemented.');
 	}
 
-	private deferClientsWatch() {
-		setTimeout(() => {
-			this.pingSilentClients();
-		}, IDLE_TIMEOUT_PING_MS);
+	#timeout_clients_watch: ReturnType<typeof setTimeout> | undefined;
+
+	#deferClientsWatch() {
+		// unref: the watchdog alone must never keep the process alive
+		this.#timeout_clients_watch = setTimeout(() => {
+			this.#pingSilentClients();
+		}, IDLE_TIMEOUT_PING_MS).unref();
 	}
 
-	private pingSilentClients() {
+	#pingSilentClients() {
 		const ts_now_ms = Date.now();
 
 		for (const client of this.clients.values()) {
@@ -165,12 +163,12 @@ export class ExtWS extends NeoEventTarget<EventMap> {
 			}
 		}
 
-		setTimeout(() => {
-			this.disconnectDeadClients();
-		}, TIMEFRAME_PING_DISCONNECT_MS);
+		this.#timeout_clients_watch = setTimeout(() => {
+			this.#disconnectDeadClients();
+		}, TIMEFRAME_PING_DISCONNECT_MS).unref();
 	}
 
-	private disconnectDeadClients() {
+	#disconnectDeadClients() {
 		const ts_now_ms = Date.now();
 
 		for (const client of this.clients.values()) {
@@ -181,12 +179,18 @@ export class ExtWS extends NeoEventTarget<EventMap> {
 			}
 		}
 
-		this.deferClientsWatch();
+		this.#deferClientsWatch();
 	}
 
-	// oxlint-disable-next-line class-methods-use-this
+	/**
+	 * Stops the server. WebSocket server implementation should override this method and call `super.close()` once its own teardown is done.
+	 * @returns -
+	 */
 	close(): Promise<void> {
-		throw new Error('Method not implemented.');
+		clearTimeout(this.#timeout_clients_watch);
+		this.destroy();
+
+		return Promise.resolve();
 	}
 }
 
