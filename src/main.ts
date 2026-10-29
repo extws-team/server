@@ -168,14 +168,15 @@ export class ExtWS<
 	}
 
 	/**
-	 * Sends a message to a specific group of clients. THis method should be implemented by WebSocket server implementation.
+	 * Sends a payload to clients subscribed to a channel. WebSocket server implementation should override this method.
+	 * Without one, the server has no clients of its own, so messages reach other servers only through an adapter.
 	 * @internal
 	 * @param _channel_id -
 	 * @param _payload -
 	 */
 	// oxlint-disable-next-line class-methods-use-this
 	publish(_channel_id: string, _payload: string): void {
-		throw new Error('Method not implemented.');
+		// no clients to publish to
 	}
 
 	#idle_timeout: number;

@@ -1,7 +1,7 @@
 {
 	"name": "@extws/server",
-	"version": "0.3.0-dev",
-	"description": "Base for simple ans powerful WebSocket server",
+	"version": "0.4.0-dev",
+	"description": "Base for simple and powerful WebSocket servers",
 	"publishConfig": {
 		"access": "public"
 	},
@@ -59,11 +59,14 @@
 		"url": "git+https://github.com/extws-team/server.git"
 	},
 	"keywords": [
+		"extws",
 		"websocket",
-		"ws",
-		"networking",
-		"json",
-		"rtc"
+		"websocket-server",
+		"realtime",
+		"pubsub",
+		"events",
+		"protocol",
+		"framework"
 	],
 	"author": "Daniil Kirichenko (https://twitter.com/kirickme)",
 	"license": "MIT",

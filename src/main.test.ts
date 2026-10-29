@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, test } from 'vitest';
 import { CHANNEL_BROADCAST, CHANNEL_GROUP_PREFIX } from '../src/consts.js';
 import { ExtWSTest, TestPublishEvent } from '../test/server.js';
 import type { ExtWSEvent } from './event.js';
+import { ExtWS } from './main.js';
 import { OutcomePayloadEventType } from './payload/outcome-event.js';
 
 const server = new ExtWSTest();
@@ -401,6 +402,18 @@ describe('adapter', () => {
 			const event = await promise;
 			expect(event.channel_id).toBe(CHANNEL_BROADCAST);
 			expect(event.detail).toStrictEqual('4{"foo":"bar"}');
+		});
+
+		test('server without WebSocket implementation', async () => {
+			// write-only adapter mode: no clients of its own, messages only go to the adapter
+			const server_bare = new ExtWS();
+			server_bare.has_adapter = true;
+			const promise = server_bare.wait(OutcomePayloadEventType.CHANNEL);
+
+			server_bare.broadcast({ foo: 'bar' });
+
+			const event = await promise;
+			expect(event.channel_id).toBe(CHANNEL_BROADCAST);
 		});
 	});
 });

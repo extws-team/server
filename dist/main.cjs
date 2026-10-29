@@ -132,14 +132,13 @@ var ExtWS = class extends neoevents.NeoEventTarget {
 		if (this.has_adapter) this.dispatchEvent(new require_outcome_event.OutcomePayloadChannelEvent(require_outcome_event.CHANNEL_BROADCAST, payload));
 	}
 	/**
-	* Sends a message to a specific group of clients. THis method should be implemented by WebSocket server implementation.
+	* Sends a payload to clients subscribed to a channel. WebSocket server implementation should override this method.
+	* Without one, the server has no clients of its own, so messages reach other servers only through an adapter.
 	* @internal
 	* @param _channel_id -
 	* @param _payload -
 	*/
-	publish(_channel_id, _payload) {
-		throw new Error("Method not implemented.");
-	}
+	publish(_channel_id, _payload) {}
 	#idle_timeout;
 	#ping_timeout_ms;
 	#idle_ping_ms;
