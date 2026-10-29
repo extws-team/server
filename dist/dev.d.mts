@@ -1,4 +1,19 @@
-import { a as Promisable, c as OutcomePayloadEventType, i as PayloadType, l as OutcomePayloadSocketEvent, n as Payload, r as PayloadData, s as OutcomePayloadChannelEvent, t as ExtWSOnBeforeUpgradeHandler } from "./types-CFR5TAml.mjs";
+import { c as ExtWSOnBeforeUpgradeOptions, d as PayloadType, f as Promisable, i as OutcomePayloadSocketEvent, l as Payload, n as OutcomePayloadChannelEvent, r as OutcomePayloadEventType, s as ExtWSOnBeforeUpgradeHandler, t as ExtWS, u as PayloadData } from "./main-BYABF2W6.mjs";
+type AnyExtWS = ExtWS<Record<string, unknown> | undefined>;
+/**
+ * Sends a payload received from another server to a socket connected to this server.
+ * @param server Server the socket is connected to.
+ * @param socket_id ID of the socket.
+ * @param payload Payload built by the other server.
+ */
+export declare function deliverToSocket(server: AnyExtWS, socket_id: string, payload: string): void;
+/**
+ * Publishes a payload received from another server to subscribers of a channel on this server, without passing it to adapters again.
+ * @param server Server to publish on.
+ * @param channel_id ID of the channel.
+ * @param payload Payload built by the other server.
+ */
+export declare function deliverToChannel(server: AnyExtWS, channel_id: string, payload: string): void;
 export declare const CHANNEL_BROADCAST = "broadcast";
 export declare const CHANNEL_GROUP_PREFIX = "g-";
 /**
@@ -16,4 +31,4 @@ type TypedArray = Int8Array | Int16Array | Int32Array | Uint8Array | Uint8Clampe
  * @returns The parsed payload.
  */
 export declare function parsePayload(payload: string | ArrayBuffer | TypedArray | Buffer[]): Payload;
-export { type ExtWSOnBeforeUpgradeHandler, OutcomePayloadChannelEvent, OutcomePayloadEventType, OutcomePayloadSocketEvent, type PayloadData, PayloadType, type Promisable };
+export { type ExtWSOnBeforeUpgradeHandler, type ExtWSOnBeforeUpgradeOptions, OutcomePayloadChannelEvent, OutcomePayloadEventType, OutcomePayloadSocketEvent, type PayloadData, PayloadType, type Promisable };

@@ -16,23 +16,33 @@ interface ExtWSClientStat {
 	ts_last_active: number;
 }
 
-export interface ClientOptions {
+export interface ClientOptions<
+	TData extends Record<string, unknown> | undefined,
+> {
 	url: URL;
 	headers: Headers;
 	ip: IP;
+	data: TData;
 }
 
-export class ExtWSClient extends NeoEventTarget {
+export class ExtWSClient<
+	TData extends Record<string, unknown> | undefined = undefined,
+> extends NeoEventTarget {
 	id: string;
-	server: ExtWS;
+	server: ExtWS<TData>;
 	url: URL;
 	headers: Headers;
 	ip: IP;
+	/** Data returned by the `onBeforeUpgrade` hook. */
+	data: TData;
 	stat: ExtWSClientStat = {
 		ts_last_active: Date.now(),
 	};
 
-	constructor(server: ExtWS, { url, headers, ip }: ClientOptions) {
+	constructor(
+		server: ExtWS<TData>,
+		{ url, headers, ip, data }: ClientOptions<TData>,
+	) {
 		super();
 
 		this.id = nanoid();
@@ -40,6 +50,7 @@ export class ExtWSClient extends NeoEventTarget {
 		this.url = url;
 		this.headers = headers;
 		this.ip = ip;
+		this.data = data;
 	}
 
 	join(group_id: string): void {

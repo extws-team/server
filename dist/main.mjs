@@ -17,14 +17,17 @@ var ExtWSClient = class extends NeoEventTarget {
 	url;
 	headers;
 	ip;
+	/** Data returned by the `onBeforeUpgrade` hook. */
+	data;
 	stat = { ts_last_active: Date.now() };
-	constructor(server, { url, headers, ip }) {
+	constructor(server, { url, headers, ip, data }) {
 		super();
 		this.id = nanoid();
 		this.server = server;
 		this.url = url;
 		this.headers = headers;
 		this.ip = ip;
+		this.data = data;
 	}
 	join(group_id) {
 		this.addToChannel("g-" + group_id);
@@ -121,6 +124,7 @@ var ExtWS = class extends NeoEventTarget {
 	}
 	/**
 	* Sends a message to a specific group of clients. THis method should be implemented by WebSocket server implementation.
+	* @internal
 	* @param _channel_id -
 	* @param _payload -
 	*/

@@ -17,15 +17,20 @@ import {
 } from './payload/outcome-event.js';
 import { type PayloadData, PayloadType } from './payload/types.js';
 
-type EventMap = {
-	connect: ExtWSEvent<undefined>;
-	disconnect: ExtWSEvent<undefined>;
+type EventMap<TData extends Record<string, unknown> | undefined> = {
+	connect: ExtWSEvent<undefined, TData>;
+	disconnect: ExtWSEvent<undefined, TData>;
 	[OutcomePayloadEventType.SOCKET]: OutcomePayloadSocketEvent;
 	[OutcomePayloadEventType.CHANNEL]: OutcomePayloadChannelEvent;
-} & Record<string, ExtWSEvent>;
+} & Record<string, ExtWSEvent<unknown, TData>>;
 
-export class ExtWS extends NeoEventTarget<EventMap> {
-	clients: Map<string, ExtWSClient> = new Map<string, ExtWSClient>();
+export class ExtWS<
+	TData extends Record<string, unknown> | undefined = undefined,
+> extends NeoEventTarget<EventMap<TData>> {
+	clients: Map<string, ExtWSClient<TData>> = new Map<
+		string,
+		ExtWSClient<TData>
+	>();
 	has_adapter = false;
 
 	constructor() {
@@ -34,7 +39,7 @@ export class ExtWS extends NeoEventTarget<EventMap> {
 		this.#deferClientsWatch();
 	}
 
-	protected onConnect(client: ExtWSClient): void {
+	protected onConnect(client: ExtWSClient<TData>): void {
 		this.clients.set(client.id, client);
 
 		client.addToChannel(CHANNEL_BROADCAST);
@@ -51,7 +56,10 @@ export class ExtWS extends NeoEventTarget<EventMap> {
 		this.dispatchEvent(event);
 	}
 
-	protected onMessage(client: ExtWSClient, payload: string | Buffer): void {
+	protected onMessage(
+		client: ExtWSClient<TData>,
+		payload: string | Buffer,
+	): void {
 		if (Buffer.isBuffer(payload)) {
 			payload = payload.toString('utf8');
 		}
@@ -135,11 +143,12 @@ export class ExtWS extends NeoEventTarget<EventMap> {
 
 	/**
 	 * Sends a message to a specific group of clients. THis method should be implemented by WebSocket server implementation.
+	 * @internal
 	 * @param _channel_id -
 	 * @param _payload -
 	 */
 	// oxlint-disable-next-line class-methods-use-this
-	protected publish(_channel_id: string, _payload: string): void {
+	publish(_channel_id: string, _payload: string): void {
 		throw new Error('Method not implemented.');
 	}
 

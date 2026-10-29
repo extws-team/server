@@ -1,3 +1,5 @@
+export { deliverToChannel, deliverToSocket } from './adapter.js';
+
 export {
 	CHANNEL_BROADCAST,
 	CHANNEL_GROUP_PREFIX,
@@ -16,6 +18,7 @@ export {
 
 export {
 	type ExtWSOnBeforeUpgradeHandler,
+	type ExtWSOnBeforeUpgradeOptions,
 	type PayloadData,
 	PayloadType,
 	type Promisable,
