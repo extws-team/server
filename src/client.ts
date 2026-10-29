@@ -14,6 +14,8 @@ const nanoid = customAlphabet(
 
 interface ExtWSClientStat {
 	ts_last_active: number;
+	/** When the server pinged the client. Any message from the client resets it. */
+	ts_ping: number | undefined;
 }
 
 export interface ClientOptions<
@@ -37,6 +39,7 @@ export class ExtWSClient<
 	data: TData;
 	stat: ExtWSClientStat = {
 		ts_last_active: Date.now(),
+		ts_ping: undefined,
 	};
 
 	constructor(

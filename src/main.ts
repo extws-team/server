@@ -4,9 +4,8 @@ import {
 	CHANNEL_BROADCAST,
 	CHANNEL_GROUP_PREFIX,
 	IDLE_TIMEOUT,
-	IDLE_TIMEOUT_DISCONNECT_MS,
-	IDLE_TIMEOUT_PING_MS,
-	TIMEFRAME_PING_DISCONNECT_MS,
+	TIMEFRAME_PING_DISCONNECT,
+	WATCHDOG_INTERVAL_MS,
 } from './consts.js';
 import { ExtWSEvent } from './event.js';
 import { buildPayload, parsePayload } from './payload/json.js';
@@ -15,7 +14,11 @@ import {
 	OutcomePayloadEventType,
 	OutcomePayloadSocketEvent,
 } from './payload/outcome-event.js';
-import { type PayloadData, PayloadType } from './payload/types.js';
+import {
+	type ExtWSOptions,
+	type PayloadData,
+	PayloadType,
+} from './payload/types.js';
 
 type EventMap<TData extends Record<string, unknown> | undefined> = {
 	connect: ExtWSEvent<undefined, TData>;
@@ -33,20 +36,42 @@ export class ExtWS<
 	>();
 	has_adapter = false;
 
-	constructor() {
+	constructor({
+		idleTimeout = IDLE_TIMEOUT,
+		pingTimeout = TIMEFRAME_PING_DISCONNECT,
+	}: ExtWSOptions = {}) {
 		super();
 
-		this.#deferClientsWatch();
+		if (
+			!(
+				Number.isFinite(idleTimeout)
+				&& pingTimeout > 0
+				&& pingTimeout < idleTimeout
+			)
+		) {
+			throw new RangeError(
+				`Options must satisfy 0 < pingTimeout < idleTimeout, got pingTimeout ${pingTimeout} and idleTimeout ${idleTimeout}.`,
+			);
+		}
+
+		this.#idle_timeout = idleTimeout;
+		this.#ping_timeout_ms = pingTimeout * 1e3;
+		this.#idle_ping_ms = (idleTimeout - pingTimeout) * 1e3;
 	}
 
 	protected onConnect(client: ExtWSClient<TData>): void {
 		this.clients.set(client.id, client);
 
+		if (this.#timeout_watchdog === undefined) {
+			// no client can need a ping earlier than that
+			this.#scheduleWatchdog(this.#idle_ping_ms);
+		}
+
 		client.addToChannel(CHANNEL_BROADCAST);
 		client.sendPayload(
 			buildPayload(PayloadType.INIT, {
 				id: client.id,
-				idle_timeout: IDLE_TIMEOUT,
+				idle_timeout: this.#idle_timeout,
 			}),
 		);
 
@@ -65,6 +90,7 @@ export class ExtWS<
 		}
 
 		client.stat.ts_last_active = Date.now();
+		client.stat.ts_ping = undefined;
 
 		const { payload_type, event_type, data } = parsePayload(payload);
 
@@ -152,43 +178,40 @@ export class ExtWS<
 		throw new Error('Method not implemented.');
 	}
 
-	#timeout_clients_watch: ReturnType<typeof setTimeout> | undefined;
+	#idle_timeout: number;
+	#ping_timeout_ms: number;
+	#idle_ping_ms: number;
+	#timeout_watchdog: ReturnType<typeof setTimeout> | undefined;
 
-	#deferClientsWatch() {
+	#scheduleWatchdog(delay_ms: number) {
 		// unref: the watchdog alone must never keep the process alive
-		this.#timeout_clients_watch = setTimeout(() => {
-			this.#pingSilentClients();
-		}, IDLE_TIMEOUT_PING_MS).unref();
+		this.#timeout_watchdog = setTimeout(() => {
+			this.#runWatchdog();
+		}, delay_ms).unref();
 	}
 
-	#pingSilentClients() {
+	#runWatchdog() {
 		const ts_now_ms = Date.now();
 
 		for (const client of this.clients.values()) {
-			const idle_ms = ts_now_ms - (client.stat.ts_last_active ?? 0);
+			const { stat } = client;
 
-			if (idle_ms >= IDLE_TIMEOUT_PING_MS) {
+			if (stat.ts_ping !== undefined) {
+				if (ts_now_ms - stat.ts_ping >= this.#ping_timeout_ms) {
+					client.disconnect();
+				}
+			} else if (ts_now_ms - stat.ts_last_active >= this.#idle_ping_ms) {
 				client.ping();
+				stat.ts_ping = ts_now_ms;
 			}
 		}
 
-		this.#timeout_clients_watch = setTimeout(() => {
-			this.#disconnectDeadClients();
-		}, TIMEFRAME_PING_DISCONNECT_MS).unref();
-	}
-
-	#disconnectDeadClients() {
-		const ts_now_ms = Date.now();
-
-		for (const client of this.clients.values()) {
-			const idle_ms = ts_now_ms - (client.stat.ts_last_active ?? 0);
-
-			if (idle_ms >= IDLE_TIMEOUT_DISCONNECT_MS) {
-				client.disconnect();
-			}
+		if (this.clients.size > 0) {
+			this.#scheduleWatchdog(WATCHDOG_INTERVAL_MS);
+		} else {
+			// the next client to connect starts the watchdog again
+			this.#timeout_watchdog = undefined;
 		}
-
-		this.#deferClientsWatch();
 	}
 
 	/**
@@ -196,7 +219,7 @@ export class ExtWS<
 	 * @returns -
 	 */
 	close(): Promise<void> {
-		clearTimeout(this.#timeout_clients_watch);
+		clearTimeout(this.#timeout_watchdog);
 		this.destroy();
 
 		return Promise.resolve();

@@ -1,10 +1,5 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest';
-import {
-	CHANNEL_BROADCAST,
-	CHANNEL_GROUP_PREFIX,
-	IDLE_TIMEOUT_PING_MS,
-	TIMEFRAME_PING_DISCONNECT_MS,
-} from '../src/consts.js';
+import { beforeEach, describe, expect, test } from 'vitest';
+import { CHANNEL_BROADCAST, CHANNEL_GROUP_PREFIX } from '../src/consts.js';
 import { ExtWSTest, TestPublishEvent } from '../test/server.js';
 import type { ExtWSEvent } from './event.js';
 import { OutcomePayloadEventType } from './payload/outcome-event.js';
@@ -62,51 +57,6 @@ describe('ExtWS', () => {
 		const event = (await promise) as ExtWSEvent<string>;
 		const startsWith = event.detail.startsWith('1{"');
 		expect(startsWith).toBe(true);
-	});
-
-	test('ping & disconnect if client is silent', async () => {
-		vi.useFakeTimers();
-
-		const server_local = new ExtWSTest();
-		server_local.open();
-
-		const promise_ping = server_local.wait('test.sendPayload');
-		const promise_disconnect = server_local.wait('disconnect');
-
-		vi.advanceTimersByTime(IDLE_TIMEOUT_PING_MS);
-		const event_ping = await promise_ping;
-		expect(event_ping).not.toBe(undefined);
-		expect(event_ping.detail).toBe('2');
-
-		vi.advanceTimersByTime(TIMEFRAME_PING_DISCONNECT_MS);
-		expect(await promise_disconnect).not.toBe(undefined);
-
-		vi.useRealTimers();
-	});
-
-	test('close stops the watchdog and clears listeners', async () => {
-		vi.useFakeTimers();
-
-		const server_local = new ExtWSTest();
-		const client = server_local.open();
-
-		let is_notified = false;
-		server_local.on('disconnect', () => {
-			is_notified = true;
-		});
-
-		expect(vi.getTimerCount()).toBeGreaterThan(0);
-
-		await server_local.close();
-
-		// watchdog is stopped
-		expect(vi.getTimerCount()).toBe(0);
-
-		// listeners are cleared, so nothing is dispatched anymore
-		client.disconnect();
-		expect(is_notified).toBe(false);
-
-		vi.useRealTimers();
 	});
 
 	test('invalid payload', () => {

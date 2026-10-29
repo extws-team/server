@@ -1,4 +1,4 @@
-import { a as parsePayload, d as TIMEFRAME_PING_DISCONNECT_MS, i as buildPayload, r as OutcomePayloadSocketEvent, s as CHANNEL_BROADCAST, t as OutcomePayloadChannelEvent, u as IDLE_TIMEOUT_PING_MS } from "./outcome-event-DHb7k3bb.mjs";
+import { a as parsePayload, i as buildPayload, l as WATCHDOG_INTERVAL_MS, r as OutcomePayloadSocketEvent, s as CHANNEL_BROADCAST, t as OutcomePayloadChannelEvent } from "./outcome-event-3mnUU0hp.mjs";
 import { NeoEvent, NeoEventTarget } from "neoevents";
 import { customAlphabet } from "nanoid";
 // src/event.ts
@@ -19,7 +19,10 @@ var ExtWSClient = class extends NeoEventTarget {
 	ip;
 	/** Data returned by the `onBeforeUpgrade` hook. */
 	data;
-	stat = { ts_last_active: Date.now() };
+	stat = {
+		ts_last_active: Date.now(),
+		ts_ping: void 0
+	};
 	constructor(server, { url, headers, ip, data }) {
 		super();
 		this.id = nanoid();
@@ -73,16 +76,20 @@ var ExtWSClient = class extends NeoEventTarget {
 var ExtWS = class extends NeoEventTarget {
 	clients = /* @__PURE__ */ new Map();
 	has_adapter = false;
-	constructor() {
+	constructor({ idleTimeout = 60, pingTimeout = 5 } = {}) {
 		super();
-		this.#deferClientsWatch();
+		if (!(Number.isFinite(idleTimeout) && pingTimeout > 0 && pingTimeout < idleTimeout)) throw new RangeError(`Options must satisfy 0 < pingTimeout < idleTimeout, got pingTimeout ${pingTimeout} and idleTimeout ${idleTimeout}.`);
+		this.#idle_timeout = idleTimeout;
+		this.#ping_timeout_ms = pingTimeout * 1e3;
+		this.#idle_ping_ms = (idleTimeout - pingTimeout) * 1e3;
 	}
 	onConnect(client) {
 		this.clients.set(client.id, client);
+		if (this.#timeout_watchdog === void 0) this.#scheduleWatchdog(this.#idle_ping_ms);
 		client.addToChannel(CHANNEL_BROADCAST);
 		client.sendPayload(buildPayload(1, {
 			id: client.id,
-			idle_timeout: 60
+			idle_timeout: this.#idle_timeout
 		}));
 		const event = new ExtWSEvent("connect", client, void 0);
 		client.dispatchEvent(event);
@@ -91,6 +98,7 @@ var ExtWS = class extends NeoEventTarget {
 	onMessage(client, payload) {
 		if (Buffer.isBuffer(payload)) payload = payload.toString("utf8");
 		client.stat.ts_last_active = Date.now();
+		client.stat.ts_ping = void 0;
 		const { payload_type, event_type, data } = parsePayload(payload);
 		switch (payload_type) {
 			case 2:
@@ -131,30 +139,35 @@ var ExtWS = class extends NeoEventTarget {
 	publish(_channel_id, _payload) {
 		throw new Error("Method not implemented.");
 	}
-	#timeout_clients_watch;
-	#deferClientsWatch() {
-		this.#timeout_clients_watch = setTimeout(() => {
-			this.#pingSilentClients();
-		}, IDLE_TIMEOUT_PING_MS).unref();
+	#idle_timeout;
+	#ping_timeout_ms;
+	#idle_ping_ms;
+	#timeout_watchdog;
+	#scheduleWatchdog(delay_ms) {
+		this.#timeout_watchdog = setTimeout(() => {
+			this.#runWatchdog();
+		}, delay_ms).unref();
 	}
-	#pingSilentClients() {
+	#runWatchdog() {
 		const ts_now_ms = Date.now();
-		for (const client of this.clients.values()) if (ts_now_ms - (client.stat.ts_last_active ?? 0) >= 55e3) client.ping();
-		this.#timeout_clients_watch = setTimeout(() => {
-			this.#disconnectDeadClients();
-		}, TIMEFRAME_PING_DISCONNECT_MS).unref();
-	}
-	#disconnectDeadClients() {
-		const ts_now_ms = Date.now();
-		for (const client of this.clients.values()) if (ts_now_ms - (client.stat.ts_last_active ?? 0) >= 6e4) client.disconnect();
-		this.#deferClientsWatch();
+		for (const client of this.clients.values()) {
+			const { stat } = client;
+			if (stat.ts_ping !== void 0) {
+				if (ts_now_ms - stat.ts_ping >= this.#ping_timeout_ms) client.disconnect();
+			} else if (ts_now_ms - stat.ts_last_active >= this.#idle_ping_ms) {
+				client.ping();
+				stat.ts_ping = ts_now_ms;
+			}
+		}
+		if (this.clients.size > 0) this.#scheduleWatchdog(WATCHDOG_INTERVAL_MS);
+		else this.#timeout_watchdog = void 0;
 	}
 	/**
 	* Stops the server. WebSocket server implementation should override this method and call `super.close()` once its own teardown is done.
 	* @returns -
 	*/
 	close() {
-		clearTimeout(this.#timeout_clients_watch);
+		clearTimeout(this.#timeout_watchdog);
 		this.destroy();
 		return Promise.resolve();
 	}

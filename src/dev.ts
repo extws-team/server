@@ -19,6 +19,7 @@ export {
 export {
 	type ExtWSOnBeforeUpgradeHandler,
 	type ExtWSOnBeforeUpgradeOptions,
+	type ExtWSOptions,
 	type PayloadData,
 	PayloadType,
 	type Promisable,

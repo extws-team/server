@@ -17,6 +17,22 @@ export enum PayloadType {
 	MESSAGE = 4,
 }
 
+/** Options of the ExtWS server shared by all WebSocket server implementations. */
+export type ExtWSOptions = {
+	/**
+	 * Seconds a client may stay silent before it is disconnected.
+	 * Also sent to clients, which use it to detect a server that went silent.
+	 * Defaults to 60.
+	 */
+	idleTimeout?: number;
+	/**
+	 * Seconds a client has to answer a ping from the server before it is disconnected.
+	 * The ping is sent once the client has been silent for `idleTimeout - pingTimeout`, so a client that does not answer is disconnected right at `idleTimeout`.
+	 * Defaults to 5.
+	 */
+	pingTimeout?: number;
+};
+
 export type ExtWSOnBeforeUpgradeHandler<TData> = (options: {
 	url: ExtWSClient['url'];
 	headers: ExtWSClient['headers'];

@@ -1,5 +1,5 @@
 Object.defineProperty(exports, Symbol.toStringTag, { value: "Module" });
-const require_outcome_event = require("./outcome-event-B6RV9p-O.cjs");
+const require_outcome_event = require("./outcome-event-B6agADp1.cjs");
 // src/adapter.ts
 /**
 * Sends a payload received from another server to a socket connected to this server.

@@ -1,7 +1,6 @@
 let neoevents = require("neoevents");
-const IDLE_TIMEOUT_DISCONNECT_MS = 6e4;
-const TIMEFRAME_PING_DISCONNECT_MS = 5e3;
-const IDLE_TIMEOUT_PING_MS = 55e3;
+// src/consts.ts
+const WATCHDOG_INTERVAL_MS = 1e3;
 const CHANNEL_BROADCAST = "broadcast";
 const CHANNEL_GROUP_PREFIX = "g-";
 // src/payload/types.ts
@@ -113,18 +112,6 @@ Object.defineProperty(exports, "CHANNEL_GROUP_PREFIX", {
 		return CHANNEL_GROUP_PREFIX;
 	}
 });
-Object.defineProperty(exports, "IDLE_TIMEOUT_DISCONNECT_MS", {
-	enumerable: true,
-	get: function() {
-		return IDLE_TIMEOUT_DISCONNECT_MS;
-	}
-});
-Object.defineProperty(exports, "IDLE_TIMEOUT_PING_MS", {
-	enumerable: true,
-	get: function() {
-		return IDLE_TIMEOUT_PING_MS;
-	}
-});
 Object.defineProperty(exports, "OutcomePayloadChannelEvent", {
 	enumerable: true,
 	get: function() {
@@ -149,10 +136,10 @@ Object.defineProperty(exports, "PayloadType", {
 		return PayloadType;
 	}
 });
-Object.defineProperty(exports, "TIMEFRAME_PING_DISCONNECT_MS", {
+Object.defineProperty(exports, "WATCHDOG_INTERVAL_MS", {
 	enumerable: true,
 	get: function() {
-		return TIMEFRAME_PING_DISCONNECT_MS;
+		return WATCHDOG_INTERVAL_MS;
 	}
 });
 Object.defineProperty(exports, "buildPayload", {

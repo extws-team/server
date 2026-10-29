@@ -1,4 +1,4 @@
-import { c as ExtWSOnBeforeUpgradeOptions, d as PayloadType, f as Promisable, i as OutcomePayloadSocketEvent, l as Payload, n as OutcomePayloadChannelEvent, r as OutcomePayloadEventType, s as ExtWSOnBeforeUpgradeHandler, t as ExtWS, u as PayloadData } from "./main-BYABF2W6.mjs";
+import { c as ExtWSOnBeforeUpgradeOptions, d as PayloadData, f as PayloadType, i as OutcomePayloadSocketEvent, l as ExtWSOptions, n as OutcomePayloadChannelEvent, p as Promisable, r as OutcomePayloadEventType, s as ExtWSOnBeforeUpgradeHandler, t as ExtWS, u as Payload } from "./main-BbuUR_Zp.mjs";
 type AnyExtWS = ExtWS<Record<string, unknown> | undefined>;
 /**
  * Sends a payload received from another server to a socket connected to this server.
@@ -31,4 +31,4 @@ type TypedArray = Int8Array | Int16Array | Int32Array | Uint8Array | Uint8Clampe
  * @returns The parsed payload.
  */
 export declare function parsePayload(payload: string | ArrayBuffer | TypedArray | Buffer[]): Payload;
-export { type ExtWSOnBeforeUpgradeHandler, type ExtWSOnBeforeUpgradeOptions, OutcomePayloadChannelEvent, OutcomePayloadEventType, OutcomePayloadSocketEvent, type PayloadData, PayloadType, type Promisable };
+export { type ExtWSOnBeforeUpgradeHandler, type ExtWSOnBeforeUpgradeOptions, type ExtWSOptions, OutcomePayloadChannelEvent, OutcomePayloadEventType, OutcomePayloadSocketEvent, type PayloadData, PayloadType, type Promisable };

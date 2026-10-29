@@ -1,7 +1,6 @@
 import { NeoEvent } from "neoevents";
-const IDLE_TIMEOUT_DISCONNECT_MS = 6e4;
-const TIMEFRAME_PING_DISCONNECT_MS = 5e3;
-const IDLE_TIMEOUT_PING_MS = 55e3;
+// src/consts.ts
+const WATCHDOG_INTERVAL_MS = 1e3;
 const CHANNEL_BROADCAST = "broadcast";
 const CHANNEL_GROUP_PREFIX = "g-";
 // src/payload/types.ts
@@ -101,4 +100,4 @@ var OutcomePayloadChannelEvent = class extends NeoEvent {
 		this.channel_id = channel_id;
 	}
 };
-export { parsePayload as a, CHANNEL_GROUP_PREFIX as c, TIMEFRAME_PING_DISCONNECT_MS as d, buildPayload as i, IDLE_TIMEOUT_DISCONNECT_MS as l, OutcomePayloadEventType as n, PayloadType as o, OutcomePayloadSocketEvent as r, CHANNEL_BROADCAST as s, OutcomePayloadChannelEvent as t, IDLE_TIMEOUT_PING_MS as u };
+export { parsePayload as a, CHANNEL_GROUP_PREFIX as c, buildPayload as i, WATCHDOG_INTERVAL_MS as l, OutcomePayloadEventType as n, PayloadType as o, OutcomePayloadSocketEvent as r, CHANNEL_BROADCAST as s, OutcomePayloadChannelEvent as t };

@@ -1,4 +1,4 @@
-import { a as parsePayload, c as CHANNEL_GROUP_PREFIX, i as buildPayload, n as OutcomePayloadEventType, o as PayloadType, r as OutcomePayloadSocketEvent, s as CHANNEL_BROADCAST, t as OutcomePayloadChannelEvent } from "./outcome-event-DHb7k3bb.mjs";
+import { a as parsePayload, c as CHANNEL_GROUP_PREFIX, i as buildPayload, n as OutcomePayloadEventType, o as PayloadType, r as OutcomePayloadSocketEvent, s as CHANNEL_BROADCAST, t as OutcomePayloadChannelEvent } from "./outcome-event-3mnUU0hp.mjs";
 // src/adapter.ts
 /**
 * Sends a payload received from another server to a socket connected to this server.

@@ -14,6 +14,21 @@ declare enum PayloadType {
   PONG = 3,
   MESSAGE = 4
 }
+/** Options of the ExtWS server shared by all WebSocket server implementations. */
+type ExtWSOptions = {
+  /**
+   * Seconds a client may stay silent before it is disconnected.
+   * Also sent to clients, which use it to detect a server that went silent.
+   * Defaults to 60.
+   */
+  idleTimeout?: number;
+  /**
+   * Seconds a client has to answer a ping from the server before it is disconnected.
+   * The ping is sent once the client has been silent for `idleTimeout - pingTimeout`, so a client that does not answer is disconnected right at `idleTimeout`.
+   * Defaults to 5.
+   */
+  pingTimeout?: number;
+};
 type ExtWSOnBeforeUpgradeHandler<TData> = (options: {
   url: ExtWSClient["url"];
   headers: ExtWSClient["headers"];
@@ -32,6 +47,8 @@ type ExtWSOnBeforeUpgradeOptions<TData extends Record<string, unknown> | undefin
 };
 interface ExtWSClientStat {
   ts_last_active: number;
+  /** When the server pinged the client. Any message from the client resets it. */
+  ts_ping: number | undefined;
 }
 interface ClientOptions<TData extends Record<string, unknown> | undefined> {
   url: URL;
@@ -87,7 +104,7 @@ declare class ExtWS<TData extends Record<string, unknown> | undefined = undefine
   #private;
   clients: Map<string, ExtWSClient<TData>>;
   has_adapter: boolean;
-  constructor();
+  constructor({ idleTimeout, pingTimeout }?: ExtWSOptions);
   protected onConnect(client: ExtWSClient<TData>): void;
   protected onMessage(client: ExtWSClient<TData>, payload: string | Buffer): void;
   sendToSocket(socket_id: string, data?: PayloadData): void;
@@ -102,4 +119,4 @@ declare class ExtWS<TData extends Record<string, unknown> | undefined = undefine
    */
   close(): Promise<void>;
 }
-export { ExtWSEvent as a, ExtWSOnBeforeUpgradeOptions as c, PayloadType as d, Promisable as f, OutcomePayloadSocketEvent as i, Payload as l, OutcomePayloadChannelEvent as n, ExtWSClient as o, OutcomePayloadEventType as r, ExtWSOnBeforeUpgradeHandler as s, ExtWS as t, PayloadData as u };
+export { ExtWSEvent as a, ExtWSOnBeforeUpgradeOptions as c, PayloadData as d, PayloadType as f, OutcomePayloadSocketEvent as i, ExtWSOptions as l, OutcomePayloadChannelEvent as n, ExtWSClient as o, Promisable as p, OutcomePayloadEventType as r, ExtWSOnBeforeUpgradeHandler as s, ExtWS as t, Payload as u };
